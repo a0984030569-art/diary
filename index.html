@@ -3,34 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>毛孩與日常手帳 | My Daily & Pet Journal</title>
+    <title>毛孩與月曆手帳 | My Daily & Calendar Journal</title>
     <!-- 引入字型 -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* 預設：溫馨粉嫩風 (Light Mode) */
+        /* 預設：溫潤大地色系風格 (Light Mode) */
         :root {
-            --bg-color: #FAF6F0;
+            --bg-color: #F7F3EE;
             --card-bg: #FFFFFF;
-            --primary-pink: #E88CA0;
-            --primary-hover: #D77A90;
-            --text-main: #5C4B43;
-            --text-muted: #9E8C82;
-            --border-color: #F3D9DE;
-            --shadow: 0 10px 25px rgba(232, 140, 160, 0.08);
-            --input-bg: #FAFAFA;
+            --earth-primary: #A3704C;     /* 溫潤大地棕色 */
+            --earth-hover: #8A5D3E;       /* 較深的棕色 hover */
+            --text-main: #4E423B;         /* 深可可色文字 */
+            --text-muted: #8C7B73;        /* 柔和灰棕色 */
+            --border-color: #E2D4C7;      /* 柔和大地邊框 */
+            --shadow: 0 10px 25px rgba(163, 112, 76, 0.08);
+            --input-bg: #FAF7F2;
+            --today-bg: #F5EBE1;
         }
 
-        /* 闇黑學院風 (Dark Mode) */
+        /* 闇黑學院風 (Dark Mode - 帶點大地金棕調) */
         body.dark-mode {
             --bg-color: #0f0e0e;
             --card-bg: #171515;
-            --primary-pink: #c5a059;
-            --primary-hover: #e6c584;
+            --earth-primary: #d4af37;     /* 經典金棕色 */
+            --earth-hover: #e6c584;
             --text-main: #d4d0c7;
             --text-muted: #9e9a90;
             --border-color: #332e29;
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
             --input-bg: #141212;
+            --today-bg: #2a241b;
         }
 
         * {
@@ -52,27 +54,26 @@
         }
 
         .container {
-            max-width: 680px;
+            max-width: 720px;
             width: 100%;
             background-color: var(--card-bg);
-            padding: 40px;
+            padding: 35px;
             border-radius: 20px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
-            position: relative;
         }
 
         /* 頂部切換按鈕 */
         .top-bar {
             display: flex;
             justify-content: flex-end;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .theme-toggle-btn {
             background: none;
             border: 1px solid var(--border-color);
-            color: var(--primary-pink);
+            color: var(--earth-primary);
             padding: 6px 14px;
             border-radius: 20px;
             cursor: pointer;
@@ -86,9 +87,9 @@
 
         h1 {
             text-align: center;
-            color: var(--primary-pink);
+            color: var(--earth-primary);
             font-size: 1.8rem;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             letter-spacing: 1px;
         }
 
@@ -96,29 +97,143 @@
             text-align: center;
             color: var(--text-muted);
             font-size: 0.95rem;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
-        /* 輸入表單區塊 */
-        .input-section {
+        /* 月曆區塊 */
+        .calendar-section {
+            margin-bottom: 30px;
             background: var(--input-bg);
             padding: 20px;
             border-radius: 14px;
             border: 1px solid var(--border-color);
-            margin-bottom: 25px;
         }
 
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-header h2 {
+            font-size: 1.2rem;
+            color: var(--earth-primary);
+        }
+
+        .cal-nav-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 5px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .cal-nav-btn:hover {
+            background-color: var(--border-color);
+            color: var(--earth-primary);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            text-align: center;
+        }
+
+        .calendar-weekday {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: bold;
+            padding-bottom: 5px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            border-color: var(--earth-primary);
+        }
+
+        .calendar-day.selected {
+            background-color: var(--earth-primary);
+            color: #fff;
+            font-weight: bold;
+            border-color: var(--earth-primary);
+        }
+        body.dark-mode .calendar-day.selected {
+            color: #0f0e0e;
+        }
+
+        .calendar-day.today {
+            background-color: var(--today-bg);
+            border: 2px solid var(--earth-primary);
+        }
+
+        .calendar-day.empty {
+            background: transparent;
+            border: none;
+            cursor: default;
+        }
+
+        /* 日期小圓點標記 (表示當天有紀錄) */
+        .has-note-dot {
+            width: 5px;
+            height: 5px;
+            background-color: var(--earth-primary);
+            border-radius: 50%;
+            margin-top: 3px;
+        }
+        .calendar-day.selected .has-note-dot {
+            background-color: #fff;
+        }
+        body.dark-mode .calendar-day.selected .has-note-dot {
+            background-color: #0f0e0e;
+        }
+
+        /* 當選定日期的詳細內容區 */
+        .selected-date-section {
+            background: var(--input-bg);
+            padding: 25px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+        }
+
+        .selected-date-title {
+            font-size: 1.15rem;
+            color: var(--earth-primary);
+            margin-bottom: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 待辦輸入區 */
         .input-group {
             display: flex;
             gap: 10px;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
 
         .input-group input, .input-group select {
-            padding: 12px 15px;
+            padding: 10px 14px;
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             background-color: var(--card-bg);
             color: var(--text-main);
             outline: none;
@@ -128,78 +243,44 @@
             flex: 1;
         }
 
-        .input-group input[type="date"] {
-            width: 150px;
-        }
-
         .input-group select {
             width: 120px;
         }
 
         .add-btn {
-            width: 100%;
-            background-color: var(--primary-pink);
+            background-color: var(--earth-primary);
             color: #fff;
             border: none;
-            padding: 12px;
+            padding: 10px 20px;
             border-radius: 10px;
             font-weight: 700;
-            font-size: 1rem;
             cursor: pointer;
         }
-
         body.dark-mode .add-btn {
             color: #0f0e0e;
         }
 
         .add-btn:hover {
-            background-color: var(--primary-hover);
+            background-color: var(--earth-hover);
         }
 
-        /* 篩選標籤按鈕 */
-        .filter-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            font-weight: 500;
-            cursor: pointer;
-            padding: 5px 12px;
-            border-radius: 20px;
-        }
-
-        .filter-btn.active {
-            background-color: var(--border-color);
-            color: var(--primary-pink);
-            font-weight: 700;
-        }
-
-        /* 清單列表 */
+        /* 任務列表 */
         .task-list {
             list-style: none;
-            max-height: 350px;
+            max-height: 220px;
             overflow-y: auto;
-            margin-bottom: 35px;
+            margin-bottom: 20px;
         }
 
         .task-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 15px;
-            background-color: var(--input-bg);
+            padding: 12px 15px;
+            background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            margin-bottom: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
         }
 
         .task-item.completed {
@@ -213,67 +294,33 @@
 
         .task-info {
             display: flex;
-            align-items: flex-start;
-            gap: 12px;
+            align-items: center;
+            gap: 10px;
             flex: 1;
         }
 
         .task-checkbox {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--primary-pink);
+            width: 18px;
+            height: 18px;
+            accent-color: var(--earth-primary);
             cursor: pointer;
-            margin-top: 3px;
-        }
-
-        .task-details {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .task-text {
-            font-size: 1rem;
-            word-break: break-all;
-        }
-
-        .task-meta {
-            display: flex;
-            gap: 10px;
-            font-size: 0.8rem;
-            color: var(--text-muted);
         }
 
         .tag {
+            font-size: 0.75rem;
             padding: 2px 6px;
             border-radius: 4px;
             background-color: var(--border-color);
-            color: var(--primary-pink);
+            color: var(--earth-primary);
             font-weight: bold;
-        }
-
-        .countdown {
-            color: #d97706;
-            font-weight: bold;
-        }
-        body.dark-mode .countdown {
-            color: #e6c584;
-        }
-
-        .countdown.expired {
-            color: #ef4444;
-        }
-
-        .task-actions {
-            display: flex;
-            gap: 8px;
+            margin-left: 6px;
         }
 
         .action-btn {
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             padding: 4px 8px;
             border-radius: 6px;
             color: var(--text-muted);
@@ -281,66 +328,43 @@
 
         .action-btn:hover {
             background-color: var(--border-color);
-            color: var(--primary-pink);
+            color: var(--earth-primary);
         }
 
-        /* 每日心情日記區 */
-        .diary-section {
-            border-top: 2px dashed var(--border-color);
-            padding-top: 25px;
+        /* 當天日記文字框 */
+        .day-diary-box {
+            margin-top: 15px;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 15px;
         }
 
-        .diary-section h2 {
-            font-size: 1.2rem;
-            color: var(--primary-pink);
-            margin-bottom: 10px;
+        .day-diary-box label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: var(--earth-primary);
+            margin-bottom: 8px;
         }
 
-        .diary-textarea {
+        .day-diary-textarea {
             width: 100%;
-            height: 120px;
+            height: 100px;
             padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            background-color: var(--input-bg);
+            background-color: var(--card-bg);
             color: var(--text-main);
             font-size: 0.95rem;
             resize: vertical;
             outline: none;
-            margin-bottom: 10px;
-        }
-
-        .diary-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .save-diary-btn {
-            background-color: var(--border-color);
-            color: var(--primary-pink);
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .save-diary-btn:hover {
-            background-color: var(--primary-pink);
-            color: #fff;
-        }
-
-        .diary-status {
-            font-size: 0.85rem;
-            color: var(--text-muted);
         }
 
         .empty-tip {
             text-align: center;
             color: var(--text-muted);
-            padding: 20px 0;
+            padding: 15px 0;
             font-style: italic;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -352,217 +376,262 @@
             <button class="theme-toggle-btn" id="themeToggleBtn">🌙 切換日夜模式</button>
         </div>
 
-        <h1>🐾 毛孩與日常手帳</h1>
-        <p class="subtitle">整合待辦、倒數計時、編輯與每日心情日記</p>
+        <h1>🐾 毛孩與月曆手帳</h1>
+        <p class="subtitle">點擊月曆上的日期，即可回顧或新增當天的待辦與心情日記</p>
 
-        <!-- 新增記事輸入區塊 -->
-        <div class="input-section">
+        <!-- 月曆檢視區塊 -->
+        <div class="calendar-section">
+            <div class="calendar-header">
+                <button class="cal-nav-btn" id="prevMonthBtn">◀ 上個月</button>
+                <h2 id="calendarTitle">2026年 6月</h2>
+                <button class="cal-nav-btn" id="nextMonthBtn">下個月 ▶</button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- 動態生成星期與日期 -->
+            </div>
+        </div>
+
+        <!-- 選定日期的詳細內容區 -->
+        <div class="selected-date-section">
+            <div class="selected-date-title">
+                <span id="selectedDateText">2026-06-06 的手帳紀錄</span>
+            </div>
+
+            <!-- 新增待辦 -->
             <div class="input-group">
-                <input type="text" id="taskInput" placeholder="輸入待辦事項或照顧提醒...">
+                <input type="text" id="taskInput" placeholder="輸入當日待辦事項或照顧提醒...">
                 <select id="categorySelect">
                     <option value="毛孩照顧">毛孩照顧</option>
                     <option value="日常生活">日常生活</option>
                     <option value="工作課業">工作課業</option>
                 </select>
+                <button class="add-btn" id="addBtn">新增</button>
             </div>
-            <div class="input-group" style="margin-bottom: 12px;">
-                <input type="date" id="taskDate" title="指定日期">
-            </div>
-            <button class="add-btn" id="addBtn">新增記事</button>
-        </div>
 
-        <!-- 類別篩選 -->
-        <div class="filter-tabs">
-            <button class="filter-btn active" data-filter="all">全部</button>
-            <button class="filter-btn" data-filter="毛孩照顧">毛孩照顧</button>
-            <button class="filter-btn" data-filter="日常生活">日常生活</button>
-            <button class="filter-btn" data-filter="工作課業">工作課業</button>
-        </div>
+            <!-- 當日待辦列表 -->
+            <ul class="task-list" id="taskList">
+                <!-- 動態生成 -->
+            </ul>
 
-        <!-- 任務列表 -->
-        <ul class="task-list" id="taskList">
-            <!-- 動態生成 -->
-        </ul>
-
-        <!-- 每日心情日記區 -->
-        <div class="diary-section">
-            <h2>📖 今日手帳與心情筆記</h2>
-            <textarea class="diary-textarea" id="diaryInput" placeholder="寫下今天的心情、與毛孩的溫馨互動，或是靈感點滴..."></textarea>
-            <div class="diary-footer">
-                <span class="diary-status" id="diaryStatus">資料已自動儲存</span>
-                <button class="save-diary-btn" id="saveDiaryBtn">手動儲存日記</button>
+            <!-- 當日日記寫作區 -->
+            <div class="day-diary-box">
+                <label for="dayDiaryInput">📖 當日心情與毛孩手帳日記（自動儲存）</label>
+                <textarea class="day-diary-textarea" id="dayDiaryInput" placeholder="寫下這一天的心情、與毛小孩的互動點滴..."></textarea>
             </div>
         </div>
     </div>
 
     <script>
+        // 資料狀態初始化 (以日期字串 YYYY-MM-DD 為 Key 存入 LocalStorage)
+        let journalData = JSON.parse(localStorage.getItem('earth_calendar_journal_data')) || {};
+        
+        // 目前顯示的月曆年月
+        let currentDate = new Date();
+        let currentYear = currentDate.getFullYear();
+        let currentMonth = currentDate.getMonth(); // 0-11
+
+        // 預設選中「今天」
+        let selectedDateStr = formatDate(new Date());
+
         // DOM 元素
+        const calendarTitle = document.getElementById('calendarTitle');
+        const calendarGrid = document.getElementById('calendarGrid');
+        const prevMonthBtn = document.getElementById('prevMonthBtn');
+        const nextMonthBtn = document.getElementById('nextMonthBtn');
+        const selectedDateText = document.getElementById('selectedDateText');
         const taskInput = document.getElementById('taskInput');
-        const taskDate = document.getElementById('taskDate');
         const categorySelect = document.getElementById('categorySelect');
         const addBtn = document.getElementById('addBtn');
         const taskList = document.getElementById('taskList');
-        const filterBtns = document.querySelectorAll('.filter-btn');
+        const dayDiaryInput = document.getElementById('dayDiaryInput');
         const themeToggleBtn = document.getElementById('themeToggleBtn');
-        const diaryInput = document.getElementById('diaryInput');
-        const saveDiaryBtn = document.getElementById('saveDiaryBtn');
-        const diaryStatus = document.getElementById('diaryStatus');
-
-        // 資料狀態初始化 (LocalStorage)
-        let tasks = JSON.parse(localStorage.getItem('ultimate_pet_diary_tasks')) || [
-            { id: 1, text: '帶巧克力去打狂犬疫苗', category: '毛孩照顧', date: '2026-06-15', completed: false },
-            { id: 2, text: '繳交行銷管理期末報告', category: '工作課業', date: '2026-06-10', completed: true }
-        ];
-        let currentFilter = 'all';
-        let editingId = null; // 記錄目前正在編輯的任務 ID
 
         // 主題狀態初始化
-        let isDarkMode = JSON.parse(localStorage.getItem('ultimate_pet_diary_dark')) || false;
+        let isDarkMode = JSON.parse(localStorage.getItem('earth_calendar_journal_dark')) || false;
         if (isDarkMode) {
             document.body.classList.add('dark-mode');
             themeToggleBtn.textContent = '☀️ 切換日夜模式';
         }
 
-        // 儲存任務至 LocalStorage
-        function saveTasks() {
-            localStorage.setItem('ultimate_pet_diary_tasks', JSON.stringify(tasks));
+        // 格式化日期為 YYYY-MM-DD
+        function formatDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
         }
 
-        // 計算倒數天數
-        function getCountdownText(dateStr) {
-            if (!dateStr) return '';
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const targetDate = new Date(dateStr);
-            targetDate.setHours(0,0,0,0);
-            
-            const diffTime = targetDate - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-            if (diffDays < 0) {
-                return `<span class="countdown expired">已過期 ${Math.abs(diffDays)} 天</span>`;
-            } else if (diffDays === 0) {
-                return `<span class="countdown">就是今天！</span>`;
-            } else {
-                return `<span class="countdown">剩餘 ${diffDays} 天</span>`;
+        // 取得或初始化指定日期的資料結構
+        function getDayData(dateStr) {
+            if (!journalData[dateStr]) {
+                journalData[dateStr] = { tasks: [], diary: '' };
             }
+            return journalData[dateStr];
         }
 
-        // 渲染任務清單
-        function renderTasks() {
-            taskList.innerHTML = '';
+        // 儲存至 LocalStorage
+        function saveData() {
+            localStorage.setItem('earth_calendar_journal_data', JSON.stringify(journalData));
+        }
 
-            const filteredTasks = tasks.filter(task => {
-                if (currentFilter === 'all') return true;
-                return task.category === currentFilter;
+        // 渲染月曆
+        function renderCalendar() {
+            calendarGrid.innerHTML = '';
+            calendarTitle.textContent = `${currentYear}年 ${currentMonth + 1}月`;
+
+            // 星期標題
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            weekdays.forEach(wd => {
+                const div = document.createElement('div');
+                div.className = 'calendar-weekday';
+                div.textContent = wd;
+                calendarGrid.appendChild(div);
             });
 
-            if (filteredTasks.length === 0) {
-                taskList.innerHTML = `<li class="empty-tip">目前沒有相關的手帳紀錄唷～✨</li>`;
-                return;
+            // 當月第一天是星期幾、當月總天數
+            const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+            const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const todayStr = formatDate(new Date());
+
+            // 補齊上個月空白格
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'calendar-day empty';
+                calendarGrid.appendChild(emptyDiv);
             }
 
-            filteredTasks.forEach(task => {
-                const li = document.createElement('li');
-                li.className = `task-item ${task.completed ? 'completed' : ''}`;
-                
-                const countdownHtml = getCountdownText(task.date);
+            // 渲染當月日子
+            for (let day = 1; day <= totalDays; day++) {
+                const mStr = String(currentMonth + 1).padStart(2, '0');
+                const dStr = String(day).padStart(2, '0');
+                const dateStr = `${currentYear}-${mStr}-${dStr}`;
 
-                li.innerHTML = `
-                    <div class="task-info">
-                        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask(${task.id})">
-                        <div class="task-details">
-                            <span class="task-text">${escapeHtml(task.text)}</span>
-                            <div class="task-meta">
-                                <span class="tag">${task.category}</span>
-                                ${task.date ? `<span>📅 ${task.date}</span>` : ''}
-                                ${countdownHtml}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="task-actions">
-                        <button class="action-btn" onclick="editTask(${task.id})">編輯</button>
-                        <button class="action-btn" onclick="deleteTask(${task.id})">刪除</button>
-                    </div>
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                if (dateStr === todayStr) dayDiv.classList.add('today');
+                if (dateStr === selectedDateStr) dayDiv.classList.add('selected');
+
+                // 檢查該天是否有寫日記或有待辦事項，若有則顯示小圓點
+                const dayData = journalData[dateStr];
+                const hasContent = dayData && (dayData.diary.trim() !== '' || (dayData.tasks && dayData.tasks.length > 0));
+
+                dayDiv.innerHTML = `
+                    <span>${day}</span>
+                    ${hasContent ? '<div class="has-note-dot"></div>' : ''}
                 `;
-                taskList.appendChild(li);
-            });
+
+                dayDiv.addEventListener('click', () => {
+                    selectedDateStr = dateStr;
+                    renderCalendar();
+                    renderSelectedDayContent();
+                });
+
+                calendarGrid.appendChild(dayDiv);
+            }
         }
 
-        // 新增或更新任務
-        function handleAddOrUpdateTask() {
+        // 渲染選定日期的詳細內容（待辦與日記）
+        function renderSelectedDayContent() {
+            selectedDateText.textContent = `${selectedDateStr} 的手帳紀錄`;
+            const dayData = getDayData(selectedDateStr);
+
+            // 渲染待辦任務
+            taskList.innerHTML = '';
+            if (!dayData.tasks || dayData.tasks.length === 0) {
+                taskList.innerHTML = `<li class="empty-tip">這一天還沒有新增待辦事項唷～✨</li>`;
+            } else {
+                dayData.tasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.className = `task-item ${task.completed ? 'completed' : ''}`;
+                    li.innerHTML = `
+                        <div class="task-info">
+                            <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask(${task.id})">
+                            <span class="task-text">${escapeHtml(task.text)}<span class="tag">${task.category}</span></span>
+                        </div>
+                        <button class="action-btn" onclick="deleteTask(${task.id})">刪除</button>
+                    `;
+                    taskList.appendChild(li);
+                });
+            }
+
+            // 填入當日日記
+            dayDiaryInput.value = dayData.diary || '';
+        }
+
+        // 新增當日待辦
+        function addTask() {
             const text = taskInput.value.trim();
             if (!text) {
-                alert('請輸入記事內容！');
+                alert('請輸入待辦內容！');
                 return;
             }
 
-            if (editingId !== null) {
-                // 編輯模式
-                tasks = tasks.map(task => {
-                    if (task.id === editingId) {
-                        return { 
-                            ...task, 
-                            text: text, 
-                            category: categorySelect.value, 
-                            date: taskDate.value 
-                        };
-                    }
-                    return task;
-                });
-                editingId = null;
-                addBtn.textContent = '新增記事';
-            } else {
-                // 新增模式
-                const newTask = {
-                    id: Date.now(),
-                    text: text,
-                    category: categorySelect.value,
-                    date: taskDate.value,
-                    completed: false
-                };
-                tasks.unshift(newTask);
-            }
+            const dayData = getDayData(selectedDateStr);
+            const newTask = {
+                id: Date.now(),
+                text: text,
+                category: categorySelect.value,
+                completed: false
+            };
 
-            saveTasks();
-            renderTasks();
-            
-            // 清空輸入框
+            dayData.tasks.push(newTask);
+            saveData();
+            renderSelectedDayContent();
+            renderCalendar(); // 更新月曆小圓點
             taskInput.value = '';
-            taskDate.value = '';
         }
 
-        // 勾選完成切換
+        // 切換任務完成狀態
         window.toggleTask = function(id) {
-            tasks = tasks.map(task => {
-                if (task.id === id) {
-                    return { ...task, completed: !task.completed };
-                }
-                return task;
-            });
-            saveTasks();
-            renderTasks();
+            const dayData = getDayData(selectedDateStr);
+            dayData.tasks = dayData.tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+            saveData();
+            renderSelectedDayContent();
         };
 
         // 刪除任務
         window.deleteTask = function(id) {
-            tasks = tasks.filter(task => task.id !== id);
-            saveTasks();
-            renderTasks();
+            const dayData = getDayData(selectedDateStr);
+            dayData.tasks = dayData.tasks.filter(t => t.id !== id);
+            saveData();
+            renderSelectedDayContent();
+            renderCalendar();
         };
 
-        // 點擊編輯
-        window.editTask = function(id) {
-            const task = tasks.find(t => t.id === id);
-            if (!task) return;
+        // 監聽當日日記即時自動儲存
+        dayDiaryInput.addEventListener('input', () => {
+            const dayData = getDayData(selectedDateStr);
+            dayData.diary = dayDiaryInput.value;
+            saveData();
+            renderCalendar(); // 更新月曆小圓點
+        });
 
-            taskInput.value = task.text;
-            categorySelect.value = task.category;
-            taskDate.value = task.date || '';
-            editingId = id;
-            addBtn.textContent = '確認修改';
-            taskInput.focus();
-        };
+        // 上／下個月按鈕
+        prevMonthBtn.addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        });
+
+        // 日夜模式切換
+        themeToggleBtn.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            localStorage.setItem('earth_calendar_journal_dark', JSON.stringify(isDarkMode));
+            themeToggleBtn.textContent = isDarkMode ? '☀️ 切換日夜模式' : '🌙 切換日夜模式';
+        });
 
         // XSS 防護
         function escapeHtml(str) {
@@ -571,48 +640,14 @@
             );
         }
 
-        // 事件監聽：新增/修改按鈕
-        addBtn.addEventListener('click', handleAddOrUpdateTask);
+        addBtn.addEventListener('click', addTask);
         taskInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleAddOrUpdateTask();
+            if (e.key === 'Enter') addTask();
         });
 
-        // 篩選切換
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentFilter = btn.getAttribute('data-filter');
-                renderTasks();
-            });
-        });
-
-        // 日夜模式切換
-        themeToggleBtn.addEventListener('click', () => {
-            isDarkMode = !isDarkMode;
-            document.body.classList.toggle('dark-mode', isDarkMode);
-            localStorage.setItem('ultimate_pet_diary_dark', JSON.stringify(isDarkMode));
-            themeToggleBtn.textContent = isDarkMode ? '☀️ 切換日夜模式' : '🌙 切換日夜模式';
-        });
-
-        // 心情日記自動儲存 (LocalStorage)
-        diaryInput.value = localStorage.getItem('ultimate_pet_diary_text') || '';
-        
-        diaryInput.addEventListener('input', () => {
-            localStorage.setItem('ultimate_pet_diary_text', diaryInput.value);
-            diaryStatus.textContent = "已自動儲存 💾";
-            setTimeout(() => {
-                diaryStatus.textContent = "資料已自動儲存";
-            }, 2000);
-        });
-
-        saveDiaryBtn.addEventListener('click', () => {
-            localStorage.setItem('ultimate_pet_diary_text', diaryInput.value);
-            alert('手帳日記已手動儲存成功！✨');
-        });
-
-        // 初始化
-        renderTasks();
+        // 初始化渲染
+        renderCalendar();
+        renderSelectedDayContent();
     </script>
 </body>
 </html>
