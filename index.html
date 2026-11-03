@@ -97,12 +97,63 @@
             text-align: center;
             color: var(--text-muted);
             font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        /* 全域搜尋區塊 */
+        .search-section {
             margin-bottom: 25px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 11px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--earth-primary);
+        }
+
+        .search-results-box {
+            display: none;
+            margin-top: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--earth-primary);
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: absolute;
+            width: calc(100% - 70px);
+            z-index: 100;
+        }
+
+        .search-result-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .search-result-item:hover {
+            background-color: var(--today-bg);
+        }
+
+        .search-result-date {
+            color: var(--earth-primary);
+            font-weight: bold;
+            margin-right: 8px;
         }
 
         /* 月曆區塊 */
         .calendar-section {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             background: var(--input-bg);
             padding: 20px;
             border-radius: 14px;
@@ -189,18 +240,46 @@
             cursor: default;
         }
 
-        /* 月曆日期上的心情表情顯示 */
         .calendar-day-mood {
             font-size: 0.85rem;
             margin-top: 2px;
         }
 
-        /* 當選定日期的詳細內容區 */
+        /* 本月數據統計面板 */
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--earth-primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* 選定日期的詳細內容區 */
         .selected-date-section {
             background: var(--input-bg);
             padding: 25px;
             border-radius: 14px;
             border: 1px solid var(--border-color);
+            position: relative;
         }
 
         .selected-date-title {
@@ -397,7 +476,7 @@
 </head>
 <body>
 
-    <div class="container">
+    <div class="container" style="position: relative;">
         <!-- 頂部日夜模式切換 -->
         <div class="top-bar">
             <button class="theme-toggle-btn" id="themeToggleBtn">🌙 切換日夜模式</button>
@@ -405,6 +484,12 @@
 
         <h1>🐾 毛孩與月曆手帳</h1>
         <p class="subtitle">點擊月曆日期，記錄今日心情、待辦事項與手帳日記</p>
+
+        <!-- 全域搜尋輸入區 -->
+        <div class="search-section" style="position: relative;">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋全年度的待辦或日記關鍵字...">
+            <div id="searchResultsBox" class="search-results-box"></div>
+        </div>
 
         <!-- 月曆檢視區塊 -->
         <div class="calendar-section">
@@ -415,6 +500,22 @@
             </div>
             <div class="calendar-grid" id="calendarGrid">
                 <!-- 動態生成星期與日期 -->
+            </div>
+        </div>
+
+        <!-- 本月數據統計面板 -->
+        <div class="stats-panel">
+            <div class="stat-card">
+                <div class="stat-value" id="statCompletedTasks">0</div>
+                <div class="stat-label">本月已完成待辦</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statDiaryCount">0</div>
+                <div class="stat-label">本月手帳篇數</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statTopMood">--</div>
+                <div class="stat-label">本月代表心情</div>
             </div>
         </div>
 
@@ -458,7 +559,7 @@
 
     <script>
         // 資料狀態初始化 (以日期字串 YYYY-MM-DD 為 Key 存入 LocalStorage)
-        let journalData = JSON.parse(localStorage.getItem('mood_calendar_journal_data')) || {};
+        let journalData = JSON.parse(localStorage.getItem('stats_calendar_journal_data')) || {};
         
         // 目前顯示的月曆年月
         let currentDate = new Date();
@@ -481,9 +582,16 @@
         const dayDiaryInput = document.getElementById('dayDiaryInput');
         const themeToggleBtn = document.getElementById('themeToggleBtn');
         const moodBtns = document.querySelectorAll('.mood-btn');
+        const searchInput = document.getElementById('searchInput');
+        const searchResultsBox = document.getElementById('searchResultsBox');
+
+        // 統計面板 DOM
+        const statCompletedTasks = document.getElementById('statCompletedTasks');
+        const statDiaryCount = document.getElementById('statDiaryCount');
+        const statTopMood = document.getElementById('statTopMood');
 
         // 主題狀態初始化
-        let isDarkMode = JSON.parse(localStorage.getItem('mood_calendar_journal_dark')) || false;
+        let isDarkMode = JSON.parse(localStorage.getItem('stats_calendar_journal_dark')) || false;
         if (isDarkMode) {
             document.body.classList.add('dark-mode');
             themeToggleBtn.textContent = '☀️ 切換日夜模式';
@@ -507,7 +615,53 @@
 
         // 儲存至 LocalStorage
         function saveData() {
-            localStorage.setItem('mood_calendar_journal_data', JSON.stringify(journalData));
+            localStorage.setItem('stats_calendar_journal_data', JSON.stringify(journalData));
+            updateMonthlyStats(); // 更新統計數據
+        }
+
+        // 計算並更新本月數據統計面板
+        function updateMonthlyStats() {
+            let completedCount = 0;
+            let diaryCount = 0;
+            let moodCounts = {};
+
+            const mStr = String(currentMonth + 1).padStart(2, '0');
+            const yearMonthPrefix = `${currentYear}-${mStr}`;
+
+            for (const [dateStr, data] of Object.entries(journalData)) {
+                // 只計算目前顯示的這個月份的資料
+                if (dateStr.startsWith(yearMonthPrefix)) {
+                    // 計算已完成待辦
+                    if (data.tasks) {
+                        data.tasks.forEach(t => {
+                            if (t.completed) completedCount++;
+                        });
+                    }
+                    // 計算手帳日記篇數
+                    if (data.diary && data.diary.trim() !== '') {
+                        diaryCount++;
+                    }
+                    // 統計心情出現次數
+                    if (data.mood) {
+                        moodCounts[data.mood] = (moodCounts[data.mood] || 0) + 1;
+                    }
+                }
+            }
+
+            // 找出本月最常出現的心情
+            let topMood = '--';
+            let maxCount = 0;
+            for (const [mood, count] of Object.entries(moodCounts)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    topMood = mood;
+                }
+            }
+
+            // 更新至畫面上
+            statCompletedTasks.textContent = completedCount;
+            statDiaryCount.textContent = diaryCount;
+            statTopMood.textContent = topMood;
         }
 
         // 渲染月曆
@@ -515,7 +669,6 @@
             calendarGrid.innerHTML = '';
             calendarTitle.textContent = `${currentYear}年 ${currentMonth + 1}月`;
 
-            // 星期標題
             const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
             weekdays.forEach(wd => {
                 const div = document.createElement('div');
@@ -524,19 +677,16 @@
                 calendarGrid.appendChild(div);
             });
 
-            // 當月第一天是星期幾、當月總天數
             const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
             const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
             const todayStr = formatDate(new Date());
 
-            // 補齊上個月空白格
             for (let i = 0; i < firstDayIndex; i++) {
                 const emptyDiv = document.createElement('div');
                 emptyDiv.className = 'calendar-day empty';
                 calendarGrid.appendChild(emptyDiv);
             }
 
-            // 渲染當月日子
             for (let day = 1; day <= totalDays; day++) {
                 const mStr = String(currentMonth + 1).padStart(2, '0');
                 const dStr = String(day).padStart(2, '0');
@@ -563,14 +713,15 @@
 
                 calendarGrid.appendChild(dayDiv);
             }
+
+            updateMonthlyStats(); // 每次切換月份時重新計算該月統計
         }
 
-        // 渲染選定日期的詳細內容（心情、待辦與日記）
+        // 渲染選定日期的詳細內容
         function renderSelectedDayContent() {
             selectedDateText.textContent = `${selectedDateStr} 的手帳紀錄`;
             const dayData = getDayData(selectedDateStr);
 
-            // 更新心情按鈕的高亮狀態
             moodBtns.forEach(btn => {
                 if (btn.getAttribute('data-mood') === dayData.mood) {
                     btn.classList.add('active');
@@ -579,7 +730,6 @@
                 }
             });
 
-            // 渲染待辦任務
             taskList.innerHTML = '';
             if (!dayData.tasks || dayData.tasks.length === 0) {
                 taskList.innerHTML = `<li class="empty-tip">這一天還沒有新增待辦事項唷～✨</li>`;
@@ -598,9 +748,66 @@
                 });
             }
 
-            // 填入當日日記
             dayDiaryInput.value = dayData.diary || '';
         }
+
+        // 全域搜尋邏輯
+        searchInput.addEventListener('input', () => {
+            const keyword = searchInput.value.trim().toLowerCase();
+            searchResultsBox.innerHTML = '';
+
+            if (!keyword) {
+                searchResultsBox.style.display = 'none';
+                return;
+            }
+
+            let results = [];
+            for (const [dateStr, data] of Object.entries(journalData)) {
+                if (data.diary && data.diary.toLowerCase().includes(keyword)) {
+                    results.push({ date: dateStr, type: '日記', text: data.diary });
+                }
+                if (data.tasks) {
+                    data.tasks.forEach(task => {
+                        if (task.text.toLowerCase().includes(keyword)) {
+                            results.push({ date: dateStr, type: '待辦', text: task.text });
+                        }
+                    });
+                }
+            }
+
+            if (results.length === 0) {
+                searchResultsBox.style.display = 'block';
+                searchResultsBox.innerHTML = `<div class="search-result-item" style="color:var(--text-muted); cursor:default;">沒有找到相關紀錄...</div>`;
+                return;
+            }
+
+            searchResultsBox.style.display = 'block';
+            results.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                div.innerHTML = `<span class="search-result-date">[${item.date}] (${item.type})</span> ${escapeHtml(item.text)}`;
+                
+                div.addEventListener('click', () => {
+                    selectedDateStr = item.date;
+                    const parts = item.date.split('-');
+                    currentYear = parseInt(parts[0]);
+                    currentMonth = parseInt(parts[1]) - 1;
+
+                    searchResultsBox.style.display = 'none';
+                    searchInput.value = '';
+                    renderCalendar();
+                    renderSelectedDayContent();
+                });
+
+                searchResultsBox.appendChild(div);
+            });
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResultsBox.contains(e.target)) {
+                searchResultsBox.style.display = 'none';
+            }
+        });
 
         // 點擊心情按鈕
         moodBtns.forEach(btn => {
@@ -608,7 +815,6 @@
                 const selectedMood = btn.getAttribute('data-mood');
                 const dayData = getDayData(selectedDateStr);
                 
-                // 如果重複點擊已選的心情則取消
                 if (dayData.mood === selectedMood) {
                     dayData.mood = '';
                 } else {
@@ -644,7 +850,6 @@
             taskInput.value = '';
         }
 
-        // 切換任務完成狀態
         window.toggleTask = function(id) {
             const dayData = getDayData(selectedDateStr);
             dayData.tasks = dayData.tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
@@ -652,7 +857,6 @@
             renderSelectedDayContent();
         };
 
-        // 刪除任務
         window.deleteTask = function(id) {
             const dayData = getDayData(selectedDateStr);
             dayData.tasks = dayData.tasks.filter(t => t.id !== id);
@@ -661,14 +865,12 @@
             renderCalendar();
         };
 
-        // 監聽當日日記即時自動儲存
         dayDiaryInput.addEventListener('input', () => {
             const dayData = getDayData(selectedDateStr);
             dayData.diary = dayDiaryInput.value;
             saveData();
         });
 
-        // 上／下個月按鈕
         prevMonthBtn.addEventListener('click', () => {
             currentMonth--;
             if (currentMonth < 0) {
@@ -687,15 +889,13 @@
             renderCalendar();
         });
 
-        // 日夜模式切換
         themeToggleBtn.addEventListener('click', () => {
             isDarkMode = !isDarkMode;
             document.body.classList.toggle('dark-mode', isDarkMode);
-            localStorage.setItem('mood_calendar_journal_dark', JSON.stringify(isDarkMode));
+            localStorage.setItem('stats_calendar_journal_dark', JSON.stringify(isDarkMode));
             themeToggleBtn.textContent = isDarkMode ? '☀️ 切換日夜模式' : '🌙 切換日夜模式';
         });
 
-        // XSS 防護
         function escapeHtml(str) {
             return str.replace(/[&<>'"]/g, 
                 tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
