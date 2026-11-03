@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>毛孩與日常手帳 | My Daily & Pet Journal</title>
-    <!-- 引入溫潤圓體字型 -->
-    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 引入字型 -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        /* 預設：溫馨粉嫩風 (Light Mode) */
         :root {
             --bg-color: #FAF6F0;
             --card-bg: #FFFFFF;
@@ -16,6 +17,20 @@
             --text-muted: #9E8C82;
             --border-color: #F3D9DE;
             --shadow: 0 10px 25px rgba(232, 140, 160, 0.08);
+            --input-bg: #FAFAFA;
+        }
+
+        /* 闇黑學院風 (Dark Mode) */
+        body.dark-mode {
+            --bg-color: #0f0e0e;
+            --card-bg: #171515;
+            --primary-pink: #c5a059;
+            --primary-hover: #e6c584;
+            --text-main: #d4d0c7;
+            --text-muted: #9e9a90;
+            --border-color: #332e29;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            --input-bg: #141212;
         }
 
         * {
@@ -23,6 +38,7 @@
             margin: 0;
             padding: 0;
             font-family: 'Zen Maru Gothic', 'PingFang TC', sans-serif;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
         }
 
         body {
@@ -36,13 +52,36 @@
         }
 
         .container {
-            max-width: 600px;
+            max-width: 680px;
             width: 100%;
             background-color: var(--card-bg);
             padding: 40px;
             border-radius: 20px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        /* 頂部切換按鈕 */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .theme-toggle-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--primary-pink);
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .theme-toggle-btn:hover {
+            background-color: var(--border-color);
         }
 
         h1 {
@@ -61,10 +100,18 @@
         }
 
         /* 輸入表單區塊 */
+        .input-section {
+            background: var(--input-bg);
+            padding: 20px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+
         .input-group {
             display: flex;
             gap: 10px;
-            margin-bottom: 25px;
+            margin-bottom: 12px;
         }
 
         .input-group input, .input-group select {
@@ -72,35 +119,37 @@
             border: 1px solid var(--border-color);
             border-radius: 10px;
             font-size: 1rem;
-            background-color: #FAFAFA;
+            background-color: var(--card-bg);
             color: var(--text-main);
             outline: none;
-            transition: border-color 0.3s;
         }
 
-        .input-group input {
+        .input-group input[type="text"] {
             flex: 1;
         }
 
-        .input-group select {
-            width: 130px;
+        .input-group input[type="date"] {
+            width: 150px;
         }
 
-        .input-group input:focus, .input-group select:focus {
-            border-color: var(--primary-pink);
-            background-color: #FFF;
+        .input-group select {
+            width: 120px;
         }
 
         .add-btn {
+            width: 100%;
             background-color: var(--primary-pink);
-            color: white;
+            color: #fff;
             border: none;
-            padding: 0 20px;
+            padding: 12px;
             border-radius: 10px;
             font-weight: 700;
             font-size: 1rem;
             cursor: pointer;
-            transition: background-color 0.3s;
+        }
+
+        body.dark-mode .add-btn {
+            color: #0f0e0e;
         }
 
         .add-btn:hover {
@@ -114,6 +163,7 @@
             margin-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 15px;
+            flex-wrap: wrap;
         }
 
         .filter-btn {
@@ -125,7 +175,6 @@
             cursor: pointer;
             padding: 5px 12px;
             border-radius: 20px;
-            transition: all 0.3s;
         }
 
         .filter-btn.active {
@@ -137,8 +186,9 @@
         /* 清單列表 */
         .task-list {
             list-style: none;
-            max-height: 400px;
+            max-height: 350px;
             overflow-y: auto;
+            margin-bottom: 35px;
         }
 
         .task-item {
@@ -146,16 +196,14 @@
             align-items: center;
             justify-content: space-between;
             padding: 15px;
-            background-color: #FAFAFA;
-            border: 1px solid #F0E6E8;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             margin-bottom: 12px;
-            transition: all 0.3s;
         }
 
         .task-item.completed {
-            background-color: #F5F0F2;
-            opacity: 0.7;
+            opacity: 0.6;
         }
 
         .task-item.completed .task-text {
@@ -165,7 +213,7 @@
 
         .task-info {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 12px;
             flex: 1;
         }
@@ -175,6 +223,13 @@
             height: 20px;
             accent-color: var(--primary-pink);
             cursor: pointer;
+            margin-top: 3px;
+        }
+
+        .task-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .task-text {
@@ -182,35 +237,109 @@
             word-break: break-all;
         }
 
+        .task-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
         .tag {
-            font-size: 0.75rem;
-            padding: 3px 8px;
-            border-radius: 6px;
+            padding: 2px 6px;
+            border-radius: 4px;
             background-color: var(--border-color);
             color: var(--primary-pink);
             font-weight: bold;
-            margin-left: 8px;
         }
 
-        .delete-btn {
+        .countdown {
+            color: #d97706;
+            font-weight: bold;
+        }
+        body.dark-mode .countdown {
+            color: #e6c584;
+        }
+
+        .countdown.expired {
+            color: #ef4444;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
             background: none;
             border: none;
-            color: #C9A0A8;
-            font-size: 1.1rem;
             cursor: pointer;
-            padding: 5px;
-            transition: color 0.3s;
+            font-size: 0.9rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: var(--text-muted);
         }
 
-        .delete-btn:hover {
-            background-color: transparent;
-            color: #E85D75;
+        .action-btn:hover {
+            background-color: var(--border-color);
+            color: var(--primary-pink);
+        }
+
+        /* 每日心情日記區 */
+        .diary-section {
+            border-top: 2px dashed var(--border-color);
+            padding-top: 25px;
+        }
+
+        .diary-section h2 {
+            font-size: 1.2rem;
+            color: var(--primary-pink);
+            margin-bottom: 10px;
+        }
+
+        .diary-textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            font-size: 0.95rem;
+            resize: vertical;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        .diary-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .save-diary-btn {
+            background-color: var(--border-color);
+            color: var(--primary-pink);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .save-diary-btn:hover {
+            background-color: var(--primary-pink);
+            color: #fff;
+        }
+
+        .diary-status {
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
 
         .empty-tip {
             text-align: center;
             color: var(--text-muted);
-            padding: 30px 0;
+            padding: 20px 0;
             font-style: italic;
         }
     </style>
@@ -218,18 +347,28 @@
 <body>
 
     <div class="container">
-        <h1>🐾 毛孩與日常手帳</h1>
-        <p class="subtitle">紀錄每一項生活小事與毛小孩的照顧清單</p>
+        <!-- 頂部日夜模式切換 -->
+        <div class="top-bar">
+            <button class="theme-toggle-btn" id="themeToggleBtn">🌙 切換日夜模式</button>
+        </div>
 
-        <!-- 輸入列 -->
-        <div class="input-group">
-            <input type="text" id="taskInput" placeholder="輸入待辦事項或照顧提醒...">
-            <select id="categorySelect">
-                <option value="毛孩照顧">毛孩照顧</option>
-                <option value="日常生活">日常生活</option>
-                <option value="工作課業">工作課業</option>
-            </select>
-            <button class="add-btn" id="addBtn">新增</button>
+        <h1>🐾 毛孩與日常手帳</h1>
+        <p class="subtitle">整合待辦、倒數計時、編輯與每日心情日記</p>
+
+        <!-- 新增記事輸入區塊 -->
+        <div class="input-section">
+            <div class="input-group">
+                <input type="text" id="taskInput" placeholder="輸入待辦事項或照顧提醒...">
+                <select id="categorySelect">
+                    <option value="毛孩照顧">毛孩照顧</option>
+                    <option value="日常生活">日常生活</option>
+                    <option value="工作課業">工作課業</option>
+                </select>
+            </div>
+            <div class="input-group" style="margin-bottom: 12px;">
+                <input type="date" id="taskDate" title="指定日期">
+            </div>
+            <button class="add-btn" id="addBtn">新增記事</button>
         </div>
 
         <!-- 類別篩選 -->
@@ -240,45 +379,86 @@
             <button class="filter-btn" data-filter="工作課業">工作課業</button>
         </div>
 
-        <!-- 列表 -->
+        <!-- 任務列表 -->
         <ul class="task-list" id="taskList">
-            <!-- 動態生成項目 -->
+            <!-- 動態生成 -->
         </ul>
+
+        <!-- 每日心情日記區 -->
+        <div class="diary-section">
+            <h2>📖 今日手帳與心情筆記</h2>
+            <textarea class="diary-textarea" id="diaryInput" placeholder="寫下今天的心情、與毛孩的溫馨互動，或是靈感點滴..."></textarea>
+            <div class="diary-footer">
+                <span class="diary-status" id="diaryStatus">資料已自動儲存</span>
+                <button class="save-diary-btn" id="saveDiaryBtn">手動儲存日記</button>
+            </div>
+        </div>
     </div>
 
     <script>
+        // DOM 元素
         const taskInput = document.getElementById('taskInput');
+        const taskDate = document.getElementById('taskDate');
         const categorySelect = document.getElementById('categorySelect');
         const addBtn = document.getElementById('addBtn');
         const taskList = document.getElementById('taskList');
         const filterBtns = document.querySelectorAll('.filter-btn');
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const diaryInput = document.getElementById('diaryInput');
+        const saveDiaryBtn = document.getElementById('saveDiaryBtn');
+        const diaryStatus = document.getElementById('diaryStatus');
 
-        // 從 LocalStorage 讀取資料，如果沒有就給預設範例
-        let tasks = JSON.parse(localStorage.getItem('pet_diary_tasks')) || [
-            { id: 1, text: '幫巧克力預約下週寵物美容', category: '毛孩照顧', completed: false },
-            { id: 2, text: '補充毛孩魚油與口服益生菌', category: '毛孩照顧', completed: true },
-            { id: 3, text: '準備行銷管理期末報告資料', category: '工作課業', completed: false }
+        // 資料狀態初始化 (LocalStorage)
+        let tasks = JSON.parse(localStorage.getItem('ultimate_pet_diary_tasks')) || [
+            { id: 1, text: '帶巧克力去打狂犬疫苗', category: '毛孩照顧', date: '2026-06-15', completed: false },
+            { id: 2, text: '繳交行銷管理期末報告', category: '工作課業', date: '2026-06-10', completed: true }
         ];
-
         let currentFilter = 'all';
+        let editingId = null; // 記錄目前正在編輯的任務 ID
 
-        // 儲存至 LocalStorage
-        function saveTasks() {
-            localStorage.setItem('pet_diary_tasks', JSON.stringify(tasks));
+        // 主題狀態初始化
+        let isDarkMode = JSON.parse(localStorage.getItem('ultimate_pet_diary_dark')) || false;
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+            themeToggleBtn.textContent = '☀️ 切換日夜模式';
         }
 
-        // 渲染畫面
+        // 儲存任務至 LocalStorage
+        function saveTasks() {
+            localStorage.setItem('ultimate_pet_diary_tasks', JSON.stringify(tasks));
+        }
+
+        // 計算倒數天數
+        function getCountdownText(dateStr) {
+            if (!dateStr) return '';
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const targetDate = new Date(dateStr);
+            targetDate.setHours(0,0,0,0);
+            
+            const diffTime = targetDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+                return `<span class="countdown expired">已過期 ${Math.abs(diffDays)} 天</span>`;
+            } else if (diffDays === 0) {
+                return `<span class="countdown">就是今天！</span>`;
+            } else {
+                return `<span class="countdown">剩餘 ${diffDays} 天</span>`;
+            }
+        }
+
+        // 渲染任務清單
         function renderTasks() {
             taskList.innerHTML = '';
 
-            // 根據篩選條件過濾
             const filteredTasks = tasks.filter(task => {
                 if (currentFilter === 'all') return true;
                 return task.category === currentFilter;
             });
 
             if (filteredTasks.length === 0) {
-                taskList.innerHTML = `<li class="empty-tip">目前沒有相關的手帳紀錄唷～趕快新增一筆吧！✨</li>`;
+                taskList.innerHTML = `<li class="empty-tip">目前沒有相關的手帳紀錄唷～✨</li>`;
                 return;
             }
 
@@ -286,39 +466,73 @@
                 const li = document.createElement('li');
                 li.className = `task-item ${task.completed ? 'completed' : ''}`;
                 
+                const countdownHtml = getCountdownText(task.date);
+
                 li.innerHTML = `
                     <div class="task-info">
                         <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask(${task.id})">
-                        <span class="task-text">${escapeHtml(task.text)}<span class="tag">${task.category}</span></span>
+                        <div class="task-details">
+                            <span class="task-text">${escapeHtml(task.text)}</span>
+                            <div class="task-meta">
+                                <span class="tag">${task.category}</span>
+                                ${task.date ? `<span>📅 ${task.date}</span>` : ''}
+                                ${countdownHtml}
+                            </div>
+                        </div>
                     </div>
-                    <button class="delete-btn" onclick="deleteTask(${task.id})">✕</button>
+                    <div class="task-actions">
+                        <button class="action-btn" onclick="editTask(${task.id})">編輯</button>
+                        <button class="action-btn" onclick="deleteTask(${task.id})">刪除</button>
+                    </div>
                 `;
                 taskList.appendChild(li);
             });
         }
 
-        // 新增任務
-        function addTask() {
+        // 新增或更新任務
+        function handleAddOrUpdateTask() {
             const text = taskInput.value.trim();
             if (!text) {
                 alert('請輸入記事內容！');
                 return;
             }
 
-            const newTask = {
-                id: Date.now(),
-                text: text,
-                category: categorySelect.value,
-                completed: false
-            };
+            if (editingId !== null) {
+                // 編輯模式
+                tasks = tasks.map(task => {
+                    if (task.id === editingId) {
+                        return { 
+                            ...task, 
+                            text: text, 
+                            category: categorySelect.value, 
+                            date: taskDate.value 
+                        };
+                    }
+                    return task;
+                });
+                editingId = null;
+                addBtn.textContent = '新增記事';
+            } else {
+                // 新增模式
+                const newTask = {
+                    id: Date.now(),
+                    text: text,
+                    category: categorySelect.value,
+                    date: taskDate.value,
+                    completed: false
+                };
+                tasks.unshift(newTask);
+            }
 
-            tasks.unshift.call(tasks, newTask); // 放到最前面
             saveTasks();
             renderTasks();
+            
+            // 清空輸入框
             taskInput.value = '';
+            taskDate.value = '';
         }
 
-        // 切換完成狀態
+        // 勾選完成切換
         window.toggleTask = function(id) {
             tasks = tasks.map(task => {
                 if (task.id === id) {
@@ -337,20 +551,33 @@
             renderTasks();
         };
 
-        // 防止 XSS 攻擊的簡單跳脫函式
+        // 點擊編輯
+        window.editTask = function(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+
+            taskInput.value = task.text;
+            categorySelect.value = task.category;
+            taskDate.value = task.date || '';
+            editingId = id;
+            addBtn.textContent = '確認修改';
+            taskInput.focus();
+        };
+
+        // XSS 防護
         function escapeHtml(str) {
             return str.replace(/[&<>'"]/g, 
                 tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
             );
         }
 
-        // 事件監聽：新增按鈕與 Enter 鍵
-        addBtn.addEventListener('click', addTask);
+        // 事件監聽：新增/修改按鈕
+        addBtn.addEventListener('click', handleAddOrUpdateTask);
         taskInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addTask();
+            if (e.key === 'Enter') handleAddOrUpdateTask();
         });
 
-        // 事件監聽：分類篩選標籤
+        // 篩選切換
         filterBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 filterBtns.forEach(b => b.classList.remove('active'));
@@ -360,7 +587,31 @@
             });
         });
 
-        // 初始化渲染
+        // 日夜模式切換
+        themeToggleBtn.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            localStorage.setItem('ultimate_pet_diary_dark', JSON.stringify(isDarkMode));
+            themeToggleBtn.textContent = isDarkMode ? '☀️ 切換日夜模式' : '🌙 切換日夜模式';
+        });
+
+        // 心情日記自動儲存 (LocalStorage)
+        diaryInput.value = localStorage.getItem('ultimate_pet_diary_text') || '';
+        
+        diaryInput.addEventListener('input', () => {
+            localStorage.setItem('ultimate_pet_diary_text', diaryInput.value);
+            diaryStatus.textContent = "已自動儲存 💾";
+            setTimeout(() => {
+                diaryStatus.textContent = "資料已自動儲存";
+            }, 2000);
+        });
+
+        saveDiaryBtn.addEventListener('click', () => {
+            localStorage.setItem('ultimate_pet_diary_text', diaryInput.value);
+            alert('手帳日記已手動儲存成功！✨');
+        });
+
+        // 初始化
         renderTasks();
     </script>
 </body>
