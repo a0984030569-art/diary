@@ -1,1 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>毛孩與日常手帳 | My Daily & Pet Journal</title>
+    <!-- 引入溫潤圓體字型 -->
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FAF6F0;
+            --card-bg: #FFFFFF;
+            --primary-pink: #E88CA0;
+            --primary-hover: #D77A90;
+            --text-main: #5C4B43;
+            --text-muted: #9E8C82;
+            --border-color: #F3D9DE;
+            --shadow: 0 10px 25px rgba(232, 140, 160, 0.08);
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Zen Maru Gothic', 'PingFang TC', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-pink);
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        /* 輸入表單區塊 */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .input-group input, .input-group select {
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            background-color: #FAFAFA;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input {
+            flex: 1;
+        }
+
+        .input-group select {
+            width: 130px;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: var(--primary-pink);
+            background-color: #FFF;
+        }
+
+        .add-btn {
+            background-color: var(--primary-pink);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .add-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* 篩選標籤按鈕 */
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .filter-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 5px 12px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background-color: var(--border-color);
+            color: var(--primary-pink);
+            font-weight: 700;
+        }
+
+        /* 清單列表 */
+        .task-list {
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: #FAFAFA;
+            border: 1px solid #F0E6E8;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+
+        .task-item.completed {
+            background-color: #F5F0F2;
+            opacity: 0.7;
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .task-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-pink);
+            cursor: pointer;
+        }
+
+        .task-text {
+            font-size: 1rem;
+            word-break: break-all;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background-color: var(--border-color);
+            color: var(--primary-pink);
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #C9A0A8;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s;
+        }
+
+        .delete-btn:hover {
+            background-color: transparent;
+            color: #E85D75;
+        }
+
+        .empty-tip {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 30px 0;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🐾 毛孩與日常手帳</h1>
+        <p class="subtitle">紀錄每一項生活小事與毛小孩的照顧清單</p>
+
+        <!-- 輸入列 -->
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="輸入待辦事項或照顧提醒...">
+            <select id="categorySelect">
+                <option value="毛孩照顧">毛孩照顧</option>
+                <option value="日常生活">日常生活</option>
+                <option value="工作課業">工作課業</option>
+            </select>
+            <button class="add-btn" id="addBtn">新增</button>
+        </div>
+
+        <!-- 類別篩選 -->
+        <div class="filter-tabs">
+            <button class="filter-btn active" data-filter="all">全部</button>
+            <button class="filter-btn" data-filter="毛孩照顧">毛孩照顧</button>
+            <button class="filter-btn" data-filter="日常生活">日常生活</button>
+            <button class="filter-btn" data-filter="工作課業">工作課業</button>
+        </div>
+
+        <!-- 列表 -->
+        <ul class="task-list" id="taskList">
+            <!-- 動態生成項目 -->
+        </ul>
+    </div>
+
+    <script>
+        const taskInput = document.getElementById('taskInput');
+        const categorySelect = document.getElementById('categorySelect');
+        const addBtn = document.getElementById('addBtn');
+        const taskList = document.getElementById('taskList');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+
+        // 從 LocalStorage 讀取資料，如果沒有就給預設範例
+        let tasks = JSON.parse(localStorage.getItem('pet_diary_tasks')) || [
+            { id: 1, text: '幫巧克力預約下週寵物美容', category: '毛孩照顧', completed: false },
+            { id: 2, text: '補充毛孩魚油與口服益生菌', category: '毛孩照顧', completed: true },
+            { id: 3, text: '準備行銷管理期末報告資料', category: '工作課業', completed: false }
+        ];
+
+        let currentFilter = 'all';
+
+        // 儲存至 LocalStorage
+        function saveTasks() {
+            localStorage.setItem('pet_diary_tasks', JSON.stringify(tasks));
+        }
+
+        // 渲染畫面
+        function renderTasks() {
+            taskList.innerHTML = '';
+
+            // 根據篩選條件過濾
+            const filteredTasks = tasks.filter(task => {
+                if (currentFilter === 'all') return true;
+                return task.category === currentFilter;
+            });
+
+            if (filteredTasks.length === 0) {
+                taskList.innerHTML = `<li class="empty-tip">目前沒有相關的手帳紀錄唷～趕快新增一筆吧！✨</li>`;
+                return;
+            }
+
+            filteredTasks.forEach(task => {
+                const li = document.createElement('li');
+                li.className = `task-item ${task.completed ? 'completed' : ''}`;
+                
+                li.innerHTML = `
+                    <div class="task-info">
+                        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask(${task.id})">
+                        <span class="task-text">${escapeHtml(task.text)}<span class="tag">${task.category}</span></span>
+                    </div>
+                    <button class="delete-btn" onclick="deleteTask(${task.id})">✕</button>
+                `;
+                taskList.appendChild(li);
+            });
+        }
+
+        // 新增任務
+        function addTask() {
+            const text = taskInput.value.trim();
+            if (!text) {
+                alert('請輸入記事內容！');
+                return;
+            }
+
+            const newTask = {
+                id: Date.now(),
+                text: text,
+                category: categorySelect.value,
+                completed: false
+            };
+
+            tasks.unshift.call(tasks, newTask); // 放到最前面
+            saveTasks();
+            renderTasks();
+            taskInput.value = '';
+        }
+
+        // 切換完成狀態
+        window.toggleTask = function(id) {
+            tasks = tasks.map(task => {
+                if (task.id === id) {
+                    return { ...task, completed: !task.completed };
+                }
+                return task;
+            });
+            saveTasks();
+            renderTasks();
+        };
+
+        // 刪除任務
+        window.deleteTask = function(id) {
+            tasks = tasks.filter(task => task.id !== id);
+            saveTasks();
+            renderTasks();
+        };
+
+        // 防止 XSS 攻擊的簡單跳脫函式
+        function escapeHtml(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        // 事件監聽：新增按鈕與 Enter 鍵
+        addBtn.addEventListener('click', addTask);
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTask();
+        });
+
+        // 事件監聽：分類篩選標籤
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.getAttribute('data-filter');
+                renderTasks();
+            });
+        });
+
+        // 初始化渲染
+        renderTasks();
+    </script>
+</body>
+</html>
