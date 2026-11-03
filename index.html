@@ -158,7 +158,7 @@
             align-items: center;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             position: relative;
@@ -189,19 +189,10 @@
             cursor: default;
         }
 
-        /* 日期小圓點標記 (表示當天有紀錄) */
-        .has-note-dot {
-            width: 5px;
-            height: 5px;
-            background-color: var(--earth-primary);
-            border-radius: 50%;
-            margin-top: 3px;
-        }
-        .calendar-day.selected .has-note-dot {
-            background-color: #fff;
-        }
-        body.dark-mode .calendar-day.selected .has-note-dot {
-            background-color: #0f0e0e;
+        /* 月曆日期上的心情表情顯示 */
+        .calendar-day-mood {
+            font-size: 0.85rem;
+            margin-top: 2px;
         }
 
         /* 當選定日期的詳細內容區 */
@@ -215,11 +206,47 @@
         .selected-date-title {
             font-size: 1.15rem;
             color: var(--earth-primary);
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             font-weight: bold;
+        }
+
+        /* 心情選擇器區塊 */
+        .mood-selector {
             display: flex;
-            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
             align-items: center;
+        }
+
+        .mood-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .mood-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .mood-btn:hover {
+            border-color: var(--earth-primary);
+        }
+
+        .mood-btn.active {
+            background-color: var(--earth-primary);
+            color: #fff;
+            border-color: var(--earth-primary);
+        }
+        body.dark-mode .mood-btn.active {
+            color: #0f0e0e;
         }
 
         /* 待辦輸入區 */
@@ -267,7 +294,7 @@
         /* 任務列表 */
         .task-list {
             list-style: none;
-            max-height: 220px;
+            max-height: 200px;
             overflow-y: auto;
             margin-bottom: 20px;
         }
@@ -348,7 +375,7 @@
 
         .day-diary-textarea {
             width: 100%;
-            height: 100px;
+            height: 90px;
             padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: 10px;
@@ -377,7 +404,7 @@
         </div>
 
         <h1>🐾 毛孩與月曆手帳</h1>
-        <p class="subtitle">點擊月曆上的日期，即可回顧或新增當天的待辦與心情日記</p>
+        <p class="subtitle">點擊月曆日期，記錄今日心情、待辦事項與手帳日記</p>
 
         <!-- 月曆檢視區塊 -->
         <div class="calendar-section">
@@ -393,8 +420,16 @@
 
         <!-- 選定日期的詳細內容區 -->
         <div class="selected-date-section">
-            <div class="selected-date-title">
-                <span id="selectedDateText">2026-06-06 的手帳紀錄</span>
+            <div class="selected-date-title" id="selectedDateText">2026-06-06 的手帳紀錄</div>
+
+            <!-- 當日心情選擇器 -->
+            <div class="mood-selector">
+                <span class="mood-label">今日心情：</span>
+                <button class="mood-btn" data-mood="😊">😊 開心</button>
+                <button class="mood-btn" data-mood="🐾">🐾 療癒</button>
+                <button class="mood-btn" data-mood="☕">☕ 愜意</button>
+                <button class="mood-btn" data-mood="🌧️">🌧️ 疲憊</button>
+                <button class="mood-btn" data-mood="💡">💡 靈感</button>
             </div>
 
             <!-- 新增待辦 -->
@@ -423,7 +458,7 @@
 
     <script>
         // 資料狀態初始化 (以日期字串 YYYY-MM-DD 為 Key 存入 LocalStorage)
-        let journalData = JSON.parse(localStorage.getItem('earth_calendar_journal_data')) || {};
+        let journalData = JSON.parse(localStorage.getItem('mood_calendar_journal_data')) || {};
         
         // 目前顯示的月曆年月
         let currentDate = new Date();
@@ -445,9 +480,10 @@
         const taskList = document.getElementById('taskList');
         const dayDiaryInput = document.getElementById('dayDiaryInput');
         const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const moodBtns = document.querySelectorAll('.mood-btn');
 
         // 主題狀態初始化
-        let isDarkMode = JSON.parse(localStorage.getItem('earth_calendar_journal_dark')) || false;
+        let isDarkMode = JSON.parse(localStorage.getItem('mood_calendar_journal_dark')) || false;
         if (isDarkMode) {
             document.body.classList.add('dark-mode');
             themeToggleBtn.textContent = '☀️ 切換日夜模式';
@@ -464,14 +500,14 @@
         // 取得或初始化指定日期的資料結構
         function getDayData(dateStr) {
             if (!journalData[dateStr]) {
-                journalData[dateStr] = { tasks: [], diary: '' };
+                journalData[dateStr] = { tasks: [], diary: '', mood: '' };
             }
             return journalData[dateStr];
         }
 
         // 儲存至 LocalStorage
         function saveData() {
-            localStorage.setItem('earth_calendar_journal_data', JSON.stringify(journalData));
+            localStorage.setItem('mood_calendar_journal_data', JSON.stringify(journalData));
         }
 
         // 渲染月曆
@@ -511,13 +547,12 @@
                 if (dateStr === todayStr) dayDiv.classList.add('today');
                 if (dateStr === selectedDateStr) dayDiv.classList.add('selected');
 
-                // 檢查該天是否有寫日記或有待辦事項，若有則顯示小圓點
                 const dayData = journalData[dateStr];
-                const hasContent = dayData && (dayData.diary.trim() !== '' || (dayData.tasks && dayData.tasks.length > 0));
+                const moodIcon = dayData && dayData.mood ? dayData.mood : '';
 
                 dayDiv.innerHTML = `
                     <span>${day}</span>
-                    ${hasContent ? '<div class="has-note-dot"></div>' : ''}
+                    <span class="calendar-day-mood">${moodIcon}</span>
                 `;
 
                 dayDiv.addEventListener('click', () => {
@@ -530,10 +565,19 @@
             }
         }
 
-        // 渲染選定日期的詳細內容（待辦與日記）
+        // 渲染選定日期的詳細內容（心情、待辦與日記）
         function renderSelectedDayContent() {
             selectedDateText.textContent = `${selectedDateStr} 的手帳紀錄`;
             const dayData = getDayData(selectedDateStr);
+
+            // 更新心情按鈕的高亮狀態
+            moodBtns.forEach(btn => {
+                if (btn.getAttribute('data-mood') === dayData.mood) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
 
             // 渲染待辦任務
             taskList.innerHTML = '';
@@ -558,6 +602,25 @@
             dayDiaryInput.value = dayData.diary || '';
         }
 
+        // 點擊心情按鈕
+        moodBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const selectedMood = btn.getAttribute('data-mood');
+                const dayData = getDayData(selectedDateStr);
+                
+                // 如果重複點擊已選的心情則取消
+                if (dayData.mood === selectedMood) {
+                    dayData.mood = '';
+                } else {
+                    dayData.mood = selectedMood;
+                }
+
+                saveData();
+                renderSelectedDayContent();
+                renderCalendar();
+            });
+        });
+
         // 新增當日待辦
         function addTask() {
             const text = taskInput.value.trim();
@@ -577,7 +640,7 @@
             dayData.tasks.push(newTask);
             saveData();
             renderSelectedDayContent();
-            renderCalendar(); // 更新月曆小圓點
+            renderCalendar();
             taskInput.value = '';
         }
 
@@ -603,7 +666,6 @@
             const dayData = getDayData(selectedDateStr);
             dayData.diary = dayDiaryInput.value;
             saveData();
-            renderCalendar(); // 更新月曆小圓點
         });
 
         // 上／下個月按鈕
@@ -629,7 +691,7 @@
         themeToggleBtn.addEventListener('click', () => {
             isDarkMode = !isDarkMode;
             document.body.classList.toggle('dark-mode', isDarkMode);
-            localStorage.setItem('earth_calendar_journal_dark', JSON.stringify(isDarkMode));
+            localStorage.setItem('mood_calendar_journal_dark', JSON.stringify(isDarkMode));
             themeToggleBtn.textContent = isDarkMode ? '☀️ 切換日夜模式' : '🌙 切換日夜模式';
         });
 
