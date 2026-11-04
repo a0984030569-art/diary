@@ -3,36 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>毛孩與月曆手帳 | My Daily & Calendar Journal</title>
-    <!-- 引入字型 -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>Daily Flow | 個人質感生活與財務手帳</title>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 引入 Chart.js 圖表庫 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* 預設：溫潤大地色系風格 (Light Mode) */
         :root {
-            --bg-color: #F7F3EE;
-            --card-bg: #FFFFFF;
-            --earth-primary: #A3704C;     /* 溫潤大地棕色 */
-            --earth-hover: #8A5D3E;       /* 較深的棕色 hover */
-            --text-main: #4E423B;         /* 深可可色文字 */
-            --text-muted: #8C7B73;        /* 柔和灰棕色 */
-            --border-color: #E2D4C7;      /* 柔和大地邊框 */
-            --shadow: 0 10px 25px rgba(163, 112, 76, 0.08);
-            --input-bg: #FAF7F2;
-            --today-bg: #F5EBE1;
-        }
-
-        /* 闇黑學院風 (Dark Mode - 帶點大地金棕調) */
-        body.dark-mode {
-            --bg-color: #0f0e0e;
-            --card-bg: #171515;
-            --earth-primary: #d4af37;     /* 經典金棕色 */
-            --earth-hover: #e6c584;
+            --bg-color: #121110;
+            --card-bg: #1c1a18;
+            --accent-gold: #c5a059;
+            --accent-hover: #e6c584;
             --text-main: #d4d0c7;
             --text-muted: #9e9a90;
             --border-color: #332e29;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-            --input-bg: #141212;
-            --today-bg: #2a241b;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            --danger: #d9534f;
+            --success: #5cb85c;
         }
 
         * {
@@ -40,7 +26,7 @@
             margin: 0;
             padding: 0;
             font-family: 'Zen Maru Gothic', 'PingFang TC', sans-serif;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+            transition: all 0.3s ease;
         }
 
         body {
@@ -50,866 +36,443 @@
             padding: 40px 20px;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
         }
 
         .container {
-            max-width: 720px;
+            max-width: 900px;
             width: 100%;
-            background-color: var(--card-bg);
-            padding: 35px;
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
         }
 
-        /* 頂部切換按鈕 */
-        .top-bar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 5px;
+        .back-link {
+            display: inline-block;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+        .back-link:hover {
+            color: var(--accent-gold);
         }
 
-        .theme-toggle-btn {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--earth-primary);
-            padding: 6px 14px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
-
-        .theme-toggle-btn:hover {
-            background-color: var(--border-color);
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 25px;
         }
 
         h1 {
-            text-align: center;
-            color: var(--earth-primary);
-            font-size: 1.8rem;
-            margin-bottom: 5px;
+            color: var(--accent-gold);
+            font-size: 2.2rem;
+            margin-bottom: 8px;
             letter-spacing: 1px;
         }
 
         p.subtitle {
-            text-align: center;
             color: var(--text-muted);
             font-size: 0.95rem;
-            margin-bottom: 20px;
         }
 
-        /* 全域搜尋區塊 */
-        .search-section {
-            margin-bottom: 25px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 11px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 0.95rem;
-            background-color: var(--input-bg);
-            color: var(--text-main);
-            outline: none;
-        }
-
-        .search-input:focus {
-            border-color: var(--earth-primary);
-        }
-
-        .search-results-box {
-            display: none;
-            margin-top: 8px;
-            background: var(--card-bg);
-            border: 1px solid var(--earth-primary);
-            border-radius: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            position: absolute;
-            width: calc(100% - 70px);
-            z-index: 100;
-        }
-
-        .search-result-item {
-            padding: 10px 15px;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .search-result-item:hover {
-            background-color: var(--today-bg);
-        }
-
-        .search-result-date {
-            color: var(--earth-primary);
-            font-weight: bold;
-            margin-right: 8px;
-        }
-
-        /* 月曆區塊 */
-        .calendar-section {
-            margin-bottom: 25px;
-            background: var(--input-bg);
-            padding: 20px;
-            border-radius: 14px;
-            border: 1px solid var(--border-color);
-        }
-
-        .calendar-header {
+        .tabs {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .calendar-header h2 {
-            font-size: 1.2rem;
-            color: var(--earth-primary);
-        }
-
-        .cal-nav-btn {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 5px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .cal-nav-btn:hover {
-            background-color: var(--border-color);
-            color: var(--earth-primary);
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-            text-align: center;
-        }
-
-        .calendar-weekday {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-weight: bold;
-            padding-bottom: 5px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            flex-direction: column;
             justify-content: center;
-            align-items: center;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            position: relative;
-        }
-
-        .calendar-day:hover {
-            border-color: var(--earth-primary);
-        }
-
-        .calendar-day.selected {
-            background-color: var(--earth-primary);
-            color: #fff;
-            font-weight: bold;
-            border-color: var(--earth-primary);
-        }
-        body.dark-mode .calendar-day.selected {
-            color: #0f0e0e;
-        }
-
-        .calendar-day.today {
-            background-color: var(--today-bg);
-            border: 2px solid var(--earth-primary);
-        }
-
-        .calendar-day.empty {
-            background: transparent;
-            border: none;
-            cursor: default;
-        }
-
-        .calendar-day-mood {
-            font-size: 0.85rem;
-            margin-top: 2px;
-        }
-
-        /* 本月數據統計面板 */
-        .stats-panel {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 15px;
             margin-bottom: 30px;
         }
 
-        .stat-card {
-            background: var(--input-bg);
+        .tab-btn {
+            background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            padding: 15px;
+            color: var(--text-muted);
+            padding: 10px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background-color: var(--accent-gold);
+            color: var(--bg-color);
+            border-color: var(--accent-gold);
+        }
+
+        .panel {
+            display: none;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        h2 {
+            color: var(--accent-gold);
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            background-color: #121110;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 15px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+
+        .btn {
+            background-color: var(--accent-gold);
+            color: var(--bg-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.95rem;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* 財務儀表板總結區 */
+        .finance-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+            background-color: #121110;
+            border: 1px solid var(--border-color);
             border-radius: 12px;
+            padding: 20px;
             text-align: center;
         }
 
-        .stat-value {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: var(--earth-primary);
-            margin-bottom: 4px;
+        .summary-card h3 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
         }
 
-        .stat-label {
+        .summary-card .amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-gold);
+        }
+
+        /* 圖表外框容器 */
+        .chart-container {
+            background-color: #121110;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            height: 280px;
+        }
+
+        .record-list {
+            list-style: none;
+            margin-top: 20px;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .record-item {
+            background-color: #121110;
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .record-info span {
+            display: block;
+        }
+
+        .record-title {
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .record-date {
             font-size: 0.8rem;
             color: var(--text-muted);
         }
 
-        /* 選定日期的詳細內容區 */
-        .selected-date-section {
-            background: var(--input-bg);
-            padding: 25px;
-            border-radius: 14px;
-            border: 1px solid var(--border-color);
-            position: relative;
-        }
-
-        .selected-date-title {
-            font-size: 1.15rem;
-            color: var(--earth-primary);
-            margin-bottom: 12px;
+        .record-amount {
             font-weight: bold;
         }
 
-        /* 心情選擇器區塊 */
-        .mood-selector {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
+        .income { color: var(--success); }
+        .expense { color: var(--danger); }
 
-        .mood-label {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            font-weight: bold;
-            margin-right: 5px;
-        }
-
-        .mood-btn {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 6px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-
-        .mood-btn:hover {
-            border-color: var(--earth-primary);
-        }
-
-        .mood-btn.active {
-            background-color: var(--earth-primary);
-            color: #fff;
-            border-color: var(--earth-primary);
-        }
-        body.dark-mode .mood-btn.active {
-            color: #0f0e0e;
-        }
-
-        /* 待辦輸入區 */
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .input-group input, .input-group select {
-            padding: 10px 14px;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 0.95rem;
-            background-color: var(--card-bg);
-            color: var(--text-main);
-            outline: none;
-        }
-
-        .input-group input[type="text"] {
-            flex: 1;
-        }
-
-        .input-group select {
-            width: 120px;
-        }
-
-        .add-btn {
-            background-color: var(--earth-primary);
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-        body.dark-mode .add-btn {
-            color: #0f0e0e;
-        }
-
-        .add-btn:hover {
-            background-color: var(--earth-hover);
-        }
-
-        /* 任務列表 */
-        .task-list {
-            list-style: none;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-        }
-
-        .task-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 15px;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            margin-bottom: 8px;
-        }
-
-        .task-item.completed {
-            opacity: 0.6;
-        }
-
-        .task-item.completed .task-text {
-            text-decoration: line-through;
-            color: var(--text-muted);
-        }
-
-        .task-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex: 1;
-        }
-
-        .task-checkbox {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--earth-primary);
-            cursor: pointer;
-        }
-
-        .tag {
-            font-size: 0.75rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background-color: var(--border-color);
-            color: var(--earth-primary);
-            font-weight: bold;
-            margin-left: 6px;
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 0.85rem;
-            padding: 4px 8px;
-            border-radius: 6px;
-            color: var(--text-muted);
-        }
-
-        .action-btn:hover {
-            background-color: var(--border-color);
-            color: var(--earth-primary);
-        }
-
-        /* 當天日記文字框 */
-        .day-diary-box {
-            margin-top: 15px;
-            border-top: 1px dashed var(--border-color);
-            padding-top: 15px;
-        }
-
-        .day-diary-box label {
-            display: block;
-            font-size: 0.95rem;
-            font-weight: bold;
-            color: var(--earth-primary);
-            margin-bottom: 8px;
-        }
-
-        .day-diary-textarea {
-            width: 100%;
-            height: 90px;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            background-color: var(--card-bg);
-            color: var(--text-main);
-            font-size: 0.95rem;
-            resize: vertical;
-            outline: none;
-        }
-
-        .empty-tip {
+        footer {
             text-align: center;
+            margin-top: 40px;
             color: var(--text-muted);
-            padding: 15px 0;
-            font-style: italic;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
     </style>
 </head>
 <body>
 
-    <div class="container" style="position: relative;">
-        <!-- 頂部日夜模式切換 -->
-        <div class="top-bar">
-            <button class="theme-toggle-btn" id="themeToggleBtn">🌙 切換日夜模式</button>
+    <div class="container">
+        <a href="https://a0984030569-art.github.io/yihua-portfolio/" class="back-link">← 返回個人品牌總站 (Portfolio Hub)</a>
+
+        <header>
+            <h1>🌿 Daily Flow</h1>
+            <p class="subtitle">個人質感生活行程管理與財務記帳看板 🐾</p>
+        </header>
+
+        <!-- 頁籤導覽 -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('diary')">📅 日常手帳與記事</button>
+            <button class="tab-btn" onclick="switchTab('finance')">💰 智能財務與記帳</button>
         </div>
 
-        <h1>🐾 毛孩與月曆手帳</h1>
-        <p class="subtitle">點擊月曆日期，記錄今日心情、待辦事項與手帳日記</p>
+        <!-- 頁籤一：日常手帳與行程 -->
+        <div id="diary" class="panel active">
+            <h2>📅 每日行程與心情手帳</h2>
+            <div class="form-group">
+                <label>選擇日期</label>
+                <input type="date" id="diaryDate">
+            </div>
+            <div class="form-group">
+                <label>今日心情與備忘</label>
+                <textarea id="diaryContent" rows="3" placeholder="例如：今天帶狗狗去散步，心情放鬆，完成了專案進度... 🐾"></textarea>
+            </div>
+            <button class="btn" onclick="addDiary()">儲存今日手帳</button>
 
-        <!-- 全域搜尋輸入區 -->
-        <div class="search-section" style="position: relative;">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜尋全年度的待辦或日記關鍵字...">
-            <div id="searchResultsBox" class="search-results-box"></div>
+            <ul class="record-list" id="diaryList"></ul>
         </div>
 
-        <!-- 月曆檢視區塊 -->
-        <div class="calendar-section">
-            <div class="calendar-header">
-                <button class="cal-nav-btn" id="prevMonthBtn">◀ 上個月</button>
-                <h2 id="calendarTitle">2026年 6月</h2>
-                <button class="cal-nav-btn" id="nextMonthBtn">下個月 ▶</button>
+        <!-- 頁籤二：智能財務與記帳 -->
+        <div id="finance" class="panel">
+            <h2>💰 個人收支與預算管理</h2>
+            
+            <!-- 財務總結看板 -->
+            <div class="finance-summary">
+                <div class="summary-card">
+                    <h3>本月總收入</h3>
+                    <div class="amount income" id="totalIncome">NT$ 0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>本月總支出</h3>
+                    <div class="amount expense" id="totalExpense">NT$ 0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>結餘（剩餘）</h3>
+                    <div class="amount" id="totalBalance">NT$ 0</div>
+                </div>
             </div>
-            <div class="calendar-grid" id="calendarGrid">
-                <!-- 動態生成星期與日期 -->
+
+            <!-- 圓形比例圖區塊 -->
+            <div class="chart-container">
+                <canvas id="expenseChart"></canvas>
             </div>
+
+            <!-- 新增收支表單 -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; align-items: end;">
+                <div class="form-group" style="margin:0;">
+                    <label>項目名稱</label>
+                    <input type="text" id="txTitle" placeholder="例如：餐飲 / 交通 / 寵物零食">
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label>金額</label>
+                    <input type="number" id="txAmount" placeholder="0">
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label>類型</label>
+                    <select id="txType">
+                        <option value="expense">支出</option>
+                        <option value="income">收入</option>
+                    </select>
+                </div>
+                <button class="btn" style="margin:0; height: 42px;" onclick="addTransaction()">新增</button>
+            </div>
+
+            <ul class="record-list" id="txList" style="margin-top: 25px;"></ul>
         </div>
 
-        <!-- 本月數據統計面板 -->
-        <div class="stats-panel">
-            <div class="stat-card">
-                <div class="stat-value" id="statCompletedTasks">0</div>
-                <div class="stat-label">本月已完成待辦</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statDiaryCount">0</div>
-                <div class="stat-label">本月手帳篇數</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statTopMood">--</div>
-                <div class="stat-label">本月代表心情</div>
-            </div>
-        </div>
-
-        <!-- 選定日期的詳細內容區 -->
-        <div class="selected-date-section">
-            <div class="selected-date-title" id="selectedDateText">2026-06-06 的手帳紀錄</div>
-
-            <!-- 當日心情選擇器 -->
-            <div class="mood-selector">
-                <span class="mood-label">今日心情：</span>
-                <button class="mood-btn" data-mood="😊">😊 開心</button>
-                <button class="mood-btn" data-mood="🐾">🐾 療癒</button>
-                <button class="mood-btn" data-mood="☕">☕ 愜意</button>
-                <button class="mood-btn" data-mood="🌧️">🌧️ 疲憊</button>
-                <button class="mood-btn" data-mood="💡">💡 靈感</button>
-            </div>
-
-            <!-- 新增待辦 -->
-            <div class="input-group">
-                <input type="text" id="taskInput" placeholder="輸入當日待辦事項或照顧提醒...">
-                <select id="categorySelect">
-                    <option value="毛孩照顧">毛孩照顧</option>
-                    <option value="日常生活">日常生活</option>
-                    <option value="工作課業">工作課業</option>
-                </select>
-                <button class="add-btn" id="addBtn">新增</button>
-            </div>
-
-            <!-- 當日待辦列表 -->
-            <ul class="task-list" id="taskList">
-                <!-- 動態生成 -->
-            </ul>
-
-            <!-- 當日日記寫作區 -->
-            <div class="day-diary-box">
-                <label for="dayDiaryInput">📖 當日心情與毛孩手帳日記（自動儲存）</label>
-                <textarea class="day-diary-textarea" id="dayDiaryInput" placeholder="寫下這一天的心情、與毛小孩的互動點滴..."></textarea>
-            </div>
-        </div>
+        <footer>
+            &copy; 2026 Daily Flow. All Rights Reserved. Designed with Elegance & Care 🐾
+        </footer>
     </div>
 
     <script>
-        // 資料狀態初始化 (以日期字串 YYYY-MM-DD 為 Key 存入 LocalStorage)
-        let journalData = JSON.parse(localStorage.getItem('stats_calendar_journal_data')) || {};
-        
-        // 目前顯示的月曆年月
-        let currentDate = new Date();
-        let currentYear = currentDate.getFullYear();
-        let currentMonth = currentDate.getMonth(); // 0-11
-
-        // 預設選中「今天」
-        let selectedDateStr = formatDate(new Date());
-
-        // DOM 元素
-        const calendarTitle = document.getElementById('calendarTitle');
-        const calendarGrid = document.getElementById('calendarGrid');
-        const prevMonthBtn = document.getElementById('prevMonthBtn');
-        const nextMonthBtn = document.getElementById('nextMonthBtn');
-        const selectedDateText = document.getElementById('selectedDateText');
-        const taskInput = document.getElementById('taskInput');
-        const categorySelect = document.getElementById('categorySelect');
-        const addBtn = document.getElementById('addBtn');
-        const taskList = document.getElementById('taskList');
-        const dayDiaryInput = document.getElementById('dayDiaryInput');
-        const themeToggleBtn = document.getElementById('themeToggleBtn');
-        const moodBtns = document.querySelectorAll('.mood-btn');
-        const searchInput = document.getElementById('searchInput');
-        const searchResultsBox = document.getElementById('searchResultsBox');
-
-        // 統計面板 DOM
-        const statCompletedTasks = document.getElementById('statCompletedTasks');
-        const statDiaryCount = document.getElementById('statDiaryCount');
-        const statTopMood = document.getElementById('statTopMood');
-
-        // 主題狀態初始化
-        let isDarkMode = JSON.parse(localStorage.getItem('stats_calendar_journal_dark')) || false;
-        if (isDarkMode) {
-            document.body.classList.add('dark-mode');
-            themeToggleBtn.textContent = '☀️ 切換日夜模式';
+        function switchTab(tabId) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
         }
 
-        // 格式化日期為 YYYY-MM-DD
-        function formatDate(date) {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
+        // 手帳功能
+        let diaries = JSON.parse(localStorage.getItem('diaries')) || [];
+        function addDiary() {
+            const date = document.getElementById('diaryDate').value;
+            const content = document.getElementById('diaryContent').value;
+            if(!date || !content) { alert('請填寫日期與內容'); return; }
+
+            diaries.unshift({ date, content });
+            localStorage.setItem('diaries', JSON.stringify(diaries));
+            renderDiaries();
+            document.getElementById('diaryContent').value = '';
         }
 
-        // 取得或初始化指定日期的資料結構
-        function getDayData(dateStr) {
-            if (!journalData[dateStr]) {
-                journalData[dateStr] = { tasks: [], diary: '', mood: '' };
-            }
-            return journalData[dateStr];
+        function renderDiaries() {
+            const list = document.getElementById('diaryList');
+            list.innerHTML = diaries.map(d => `
+                <li class="record-item">
+                    <div class="record-info">
+                        <span class="record-title">${d.content}</span>
+                        <span class="record-date">📅 ${d.date}</span>
+                    </div>
+                </li>
+            `).join('');
         }
 
-        // 儲存至 LocalStorage
-        function saveData() {
-            localStorage.setItem('stats_calendar_journal_data', JSON.stringify(journalData));
-            updateMonthlyStats(); // 更新統計數據
+        // 財務記帳與圖表功能
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        let myChart = null;
+
+        function addTransaction() {
+            const title = document.getElementById('txTitle').value;
+            const amount = parseFloat(document.getElementById('txAmount').value);
+            const type = document.getElementById('txType').value;
+
+            if(!title || isNaN(amount)) { alert('請填寫完整的項目與金額'); return; }
+
+            transactions.unshift({ title, amount, type });
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            renderTransactions();
+            
+            document.getElementById('txTitle').value = '';
+            document.getElementById('txAmount').value = '';
         }
 
-        // 計算並更新本月數據統計面板
-        function updateMonthlyStats() {
-            let completedCount = 0;
-            let diaryCount = 0;
-            let moodCounts = {};
+        function renderTransactions() {
+            const list = document.getElementById('txList');
+            let income = 0, expense = 0;
+            let expenseCategories = {};
 
-            const mStr = String(currentMonth + 1).padStart(2, '0');
-            const yearMonthPrefix = `${currentYear}-${mStr}`;
-
-            for (const [dateStr, data] of Object.entries(journalData)) {
-                // 只計算目前顯示的這個月份的資料
-                if (dateStr.startsWith(yearMonthPrefix)) {
-                    // 計算已完成待辦
-                    if (data.tasks) {
-                        data.tasks.forEach(t => {
-                            if (t.completed) completedCount++;
-                        });
-                    }
-                    // 計算手帳日記篇數
-                    if (data.diary && data.diary.trim() !== '') {
-                        diaryCount++;
-                    }
-                    // 統計心情出現次數
-                    if (data.mood) {
-                        moodCounts[data.mood] = (moodCounts[data.mood] || 0) + 1;
-                    }
-                }
-            }
-
-            // 找出本月最常出現的心情
-            let topMood = '--';
-            let maxCount = 0;
-            for (const [mood, count] of Object.entries(moodCounts)) {
-                if (count > maxCount) {
-                    maxCount = count;
-                    topMood = mood;
-                }
-            }
-
-            // 更新至畫面上
-            statCompletedTasks.textContent = completedCount;
-            statDiaryCount.textContent = diaryCount;
-            statTopMood.textContent = topMood;
-        }
-
-        // 渲染月曆
-        function renderCalendar() {
-            calendarGrid.innerHTML = '';
-            calendarTitle.textContent = `${currentYear}年 ${currentMonth + 1}月`;
-
-            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-            weekdays.forEach(wd => {
-                const div = document.createElement('div');
-                div.className = 'calendar-weekday';
-                div.textContent = wd;
-                calendarGrid.appendChild(div);
-            });
-
-            const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
-            const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
-            const todayStr = formatDate(new Date());
-
-            for (let i = 0; i < firstDayIndex; i++) {
-                const emptyDiv = document.createElement('div');
-                emptyDiv.className = 'calendar-day empty';
-                calendarGrid.appendChild(emptyDiv);
-            }
-
-            for (let day = 1; day <= totalDays; day++) {
-                const mStr = String(currentMonth + 1).padStart(2, '0');
-                const dStr = String(day).padStart(2, '0');
-                const dateStr = `${currentYear}-${mStr}-${dStr}`;
-
-                const dayDiv = document.createElement('div');
-                dayDiv.className = 'calendar-day';
-                if (dateStr === todayStr) dayDiv.classList.add('today');
-                if (dateStr === selectedDateStr) dayDiv.classList.add('selected');
-
-                const dayData = journalData[dateStr];
-                const moodIcon = dayData && dayData.mood ? dayData.mood : '';
-
-                dayDiv.innerHTML = `
-                    <span>${day}</span>
-                    <span class="calendar-day-mood">${moodIcon}</span>
-                `;
-
-                dayDiv.addEventListener('click', () => {
-                    selectedDateStr = dateStr;
-                    renderCalendar();
-                    renderSelectedDayContent();
-                });
-
-                calendarGrid.appendChild(dayDiv);
-            }
-
-            updateMonthlyStats(); // 每次切換月份時重新計算該月統計
-        }
-
-        // 渲染選定日期的詳細內容
-        function renderSelectedDayContent() {
-            selectedDateText.textContent = `${selectedDateStr} 的手帳紀錄`;
-            const dayData = getDayData(selectedDateStr);
-
-            moodBtns.forEach(btn => {
-                if (btn.getAttribute('data-mood') === dayData.mood) {
-                    btn.classList.add('active');
+            list.innerHTML = transactions.map(t => {
+                if(t.type === 'income') {
+                    income += t.amount;
                 } else {
-                    btn.classList.remove('active');
+                    expense += t.amount;
+                    expenseCategories[t.title] = (expenseCategories[t.title] || 0) + t.amount;
                 }
-            });
 
-            taskList.innerHTML = '';
-            if (!dayData.tasks || dayData.tasks.length === 0) {
-                taskList.innerHTML = `<li class="empty-tip">這一天還沒有新增待辦事項唷～✨</li>`;
-            } else {
-                dayData.tasks.forEach(task => {
-                    const li = document.createElement('li');
-                    li.className = `task-item ${task.completed ? 'completed' : ''}`;
-                    li.innerHTML = `
-                        <div class="task-info">
-                            <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask(${task.id})">
-                            <span class="task-text">${escapeHtml(task.text)}<span class="tag">${task.category}</span></span>
+                return `
+                    <li class="record-item">
+                        <div class="record-info">
+                            <span class="record-title">${t.title}</span>
+                            <span class="record-date">${t.type === 'income' ? '收入' : '支出'}</span>
                         </div>
-                        <button class="action-btn" onclick="deleteTask(${task.id})">刪除</button>
-                    `;
-                    taskList.appendChild(li);
-                });
-            }
+                        <span class="record-amount ${t.type}">
+                            ${t.type === 'income' ? '+' : '-'} NT$ ${t.amount.toLocaleString()}
+                        </span>
+                    </li>
+                `;
+            }).join('');
 
-            dayDiaryInput.value = dayData.diary || '';
+            document.getElementById('totalIncome').innerText = `NT$ ${income.toLocaleString()}`;
+            document.getElementById('totalExpense').innerText = `NT$ ${expense.toLocaleString()}`;
+            const balance = income - expense;
+            const balanceEl = document.getElementById('totalBalance');
+            balanceEl.innerText = `NT$ ${balance.toLocaleString()}`;
+            balanceEl.style.color = balance >= baseColorCheck(balance) ? 'var(--accent-gold)' : 'var(--danger)';
+
+            updateChart(expenseCategories);
         }
 
-        // 全域搜尋邏輯
-        searchInput.addEventListener('input', () => {
-            const keyword = searchInput.value.trim().toLowerCase();
-            searchResultsBox.innerHTML = '';
+        function baseColorCheck(val) {
+            return 0; // 輔助檢查結餘正負色調
+        }
 
-            if (!keyword) {
-                searchResultsBox.style.display = 'none';
-                return;
+        // 更新圓形比例圖
+        function updateChart(categories) {
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            const labels = Object.keys(categories);
+            const data = Object.values(categories);
+
+            if (myChart) {
+                myChart.destroy();
             }
 
-            let results = [];
-            for (const [dateStr, data] of Object.entries(journalData)) {
-                if (data.diary && data.diary.toLowerCase().includes(keyword)) {
-                    results.push({ date: dateStr, type: '日記', text: data.diary });
-                }
-                if (data.tasks) {
-                    data.tasks.forEach(task => {
-                        if (task.text.toLowerCase().includes(keyword)) {
-                            results.push({ date: dateStr, type: '待辦', text: task.text });
+            // 大地色系色票配置
+            const earthColors = ['#c5a059', '#e6c584', '#8c6d46', '#d99b6b', '#a67c52', '#594a3c'];
+
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels.length > 0 ? labels : ['尚無支出紀錄'],
+                    datasets: [{
+                        data: data.length > 0 ? data : [1],
+                        backgroundColor: labels.length > 0 ? earthColors.slice(0, labels.length) : ['#332e29'],
+                        borderWidth: 1,
+                        borderColor: '#1c1a18'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#d4d0c7',
+                                font: { family: 'Zen Maru Gothic', size: 12 }
+                            }
                         }
-                    });
+                    }
                 }
-            }
-
-            if (results.length === 0) {
-                searchResultsBox.style.display = 'block';
-                searchResultsBox.innerHTML = `<div class="search-result-item" style="color:var(--text-muted); cursor:default;">沒有找到相關紀錄...</div>`;
-                return;
-            }
-
-            searchResultsBox.style.display = 'block';
-            results.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'search-result-item';
-                div.innerHTML = `<span class="search-result-date">[${item.date}] (${item.type})</span> ${escapeHtml(item.text)}`;
-                
-                div.addEventListener('click', () => {
-                    selectedDateStr = item.date;
-                    const parts = item.date.split('-');
-                    currentYear = parseInt(parts[0]);
-                    currentMonth = parseInt(parts[1]) - 1;
-
-                    searchResultsBox.style.display = 'none';
-                    searchInput.value = '';
-                    renderCalendar();
-                    renderSelectedDayContent();
-                });
-
-                searchResultsBox.appendChild(div);
             });
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!searchInput.contains(e.target) && !searchResultsBox.contains(e.target)) {
-                searchResultsBox.style.display = 'none';
-            }
-        });
-
-        // 點擊心情按鈕
-        moodBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const selectedMood = btn.getAttribute('data-mood');
-                const dayData = getDayData(selectedDateStr);
-                
-                if (dayData.mood === selectedMood) {
-                    dayData.mood = '';
-                } else {
-                    dayData.mood = selectedMood;
-                }
-
-                saveData();
-                renderSelectedDayContent();
-                renderCalendar();
-            });
-        });
-
-        // 新增當日待辦
-        function addTask() {
-            const text = taskInput.value.trim();
-            if (!text) {
-                alert('請輸入待辦內容！');
-                return;
-            }
-
-            const dayData = getDayData(selectedDateStr);
-            const newTask = {
-                id: Date.now(),
-                text: text,
-                category: categorySelect.value,
-                completed: false
-            };
-
-            dayData.tasks.push(newTask);
-            saveData();
-            renderSelectedDayContent();
-            renderCalendar();
-            taskInput.value = '';
         }
 
-        window.toggleTask = function(id) {
-            const dayData = getDayData(selectedDateStr);
-            dayData.tasks = dayData.tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
-            saveData();
-            renderSelectedDayContent();
-        };
-
-        window.deleteTask = function(id) {
-            const dayData = getDayData(selectedDateStr);
-            dayData.tasks = dayData.tasks.filter(t => t.id !== id);
-            saveData();
-            renderSelectedDayContent();
-            renderCalendar();
-        };
-
-        dayDiaryInput.addEventListener('input', () => {
-            const dayData = getDayData(selectedDateStr);
-            dayData.diary = dayDiaryInput.value;
-            saveData();
-        });
-
-        prevMonthBtn.addEventListener('click', () => {
-            currentMonth--;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            renderCalendar();
-        });
-
-        nextMonthBtn.addEventListener('click', () => {
-            currentMonth++;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            renderCalendar();
-        });
-
-        themeToggleBtn.addEventListener('click', () => {
-            isDarkMode = !isDarkMode;
-            document.body.classList.toggle('dark-mode', isDarkMode);
-            localStorage.setItem('stats_calendar_journal_dark', JSON.stringify(isDarkMode));
-            themeToggleBtn.textContent = isDarkMode ? '☀️ 切換日夜模式' : '🌙 切換日夜模式';
-        });
-
-        function escapeHtml(str) {
-            return str.replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-            );
-        }
-
-        addBtn.addEventListener('click', addTask);
-        taskInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addTask();
-        });
-
-        // 初始化渲染
-        renderCalendar();
-        renderSelectedDayContent();
+        // 初始化
+        renderDiaries();
+        renderTransactions();
     </script>
 </body>
 </html>
