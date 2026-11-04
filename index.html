@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Flow | 個人質感生活與財務手帳</title>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- 引入 Chart.js 圖表庫 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #121110;
-            --card-bg: #1c1a18;
-            --accent-gold: #c5a059;
-            --accent-hover: #e6c584;
-            --text-main: #d4d0c7;
-            --text-muted: #9e9a90;
-            --border-color: #332e29;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-            --danger: #d9534f;
-            --success: #5cb85c;
+            /* 溫潤大地色系調整 */
+            --bg-color: #f4efe6;
+            --card-bg: #fffbf5;
+            --accent-gold: #9c7c47;
+            --accent-hover: #b89355;
+            --text-main: #3e3832;
+            --text-muted: #82786f;
+            --border-color: #e3d7c8;
+            --shadow: 0 10px 30px rgba(156, 124, 71, 0.1);
+            --danger: #b85c5c;
+            --success: #5c9c63;
         }
 
         * {
@@ -43,20 +43,9 @@
             width: 100%;
         }
 
-        .back-link {
-            display: inline-block;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.9rem;
-            margin-bottom: 25px;
-        }
-        .back-link:hover {
-            color: var(--accent-gold);
-        }
-
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 25px;
         }
@@ -73,6 +62,7 @@
             font-size: 0.95rem;
         }
 
+        /* 頁籤導覽 */
         .tabs {
             display: flex;
             justify-content: center;
@@ -93,7 +83,7 @@
 
         .tab-btn.active, .tab-btn:hover {
             background-color: var(--accent-gold);
-            color: var(--bg-color);
+            color: #fff;
             border-color: var(--accent-gold);
         }
 
@@ -133,7 +123,7 @@
 
         input, select, textarea {
             width: 100%;
-            background-color: #121110;
+            background-color: #fff;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 10px 15px;
@@ -148,7 +138,7 @@
 
         .btn {
             background-color: var(--accent-gold);
-            color: var(--bg-color);
+            color: #fff;
             border: none;
             padding: 10px 20px;
             border-radius: 8px;
@@ -163,7 +153,24 @@
             background-color: var(--accent-hover);
         }
 
-        /* 財務儀表板總結區 */
+        /* 搜尋框樣式 */
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        /* 日曆與排版輔助 */
+        .calendar-section {
+            background-color: #fcf8f2;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--accent-gold);
+        }
+
+        /* 財務總結卡片 */
         .finance-summary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -172,7 +179,7 @@
         }
 
         .summary-card {
-            background-color: #121110;
+            background-color: #fcf8f2;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 20px;
@@ -191,9 +198,8 @@
             color: var(--accent-gold);
         }
 
-        /* 圖表外框容器 */
         .chart-container {
-            background-color: #121110;
+            background-color: #fcf8f2;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 20px;
@@ -202,18 +208,18 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            height: 280px;
+            height: 260px;
         }
 
         .record-list {
             list-style: none;
             margin-top: 20px;
-            max-height: 220px;
+            max-height: 250px;
             overflow-y: auto;
         }
 
         .record-item {
-            background-color: #121110;
+            background-color: #fcf8f2;
             border: 1px solid var(--border-color);
             padding: 12px 15px;
             border-radius: 8px;
@@ -237,12 +243,30 @@
             color: var(--text-muted);
         }
 
+        .record-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
         .record-amount {
             font-weight: bold;
         }
 
         .income { color: var(--success); }
         .expense { color: var(--danger); }
+
+        .del-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        .del-btn:hover {
+            text-decoration: underline;
+        }
 
         footer {
             text-align: center;
@@ -255,8 +279,6 @@
 <body>
 
     <div class="container">
-        <a href="https://a0984030569-art.github.io/yihua-portfolio/" class="back-link">← 返回個人品牌總站 (Portfolio Hub)</a>
-
         <header>
             <h1>🌿 Daily Flow</h1>
             <p class="subtitle">個人質感生活行程管理與財務記帳看板 🐾</p>
@@ -271,13 +293,25 @@
         <!-- 頁籤一：日常手帳與行程 -->
         <div id="diary" class="panel active">
             <h2>📅 每日行程與心情手帳</h2>
+            
+            <!-- 日曆簡易檢視區 -->
+            <div class="calendar-section" id="currentMonthDisplay">
+                🗓️ 載入行事曆中...
+            </div>
+
+            <!-- 全域搜尋框 -->
+            <div class="form-group search-box">
+                <label>🔍 快速檢索歷史手帳</label>
+                <input type="text" id="searchInput" placeholder="輸入關鍵字搜尋記事..." oninput="renderDiaries()">
+            </div>
+
             <div class="form-group">
                 <label>選擇日期</label>
                 <input type="date" id="diaryDate">
             </div>
             <div class="form-group">
                 <label>今日心情與備忘</label>
-                <textarea id="diaryContent" rows="3" placeholder="例如：今天帶狗狗去散步，心情放鬆，完成了專案進度... 🐾"></textarea>
+                <textarea id="diaryContent" rows="3" placeholder="例如：今天完成專案進度，心情放鬆... 🐾"></textarea>
             </div>
             <button class="btn" onclick="addDiary()">儲存今日手帳</button>
 
@@ -304,7 +338,7 @@
                 </div>
             </div>
 
-            <!-- 圓形比例圖區塊 -->
+            <!-- 圓形比例圖 -->
             <div class="chart-container">
                 <canvas id="expenseChart"></canvas>
             </div>
@@ -313,7 +347,7 @@
             <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; align-items: end;">
                 <div class="form-group" style="margin:0;">
                     <label>項目名稱</label>
-                    <input type="text" id="txTitle" placeholder="例如：餐飲 / 交通 / 寵物零食">
+                    <input type="text" id="txTitle" placeholder="例如：餐飲 / 寵物用品">
                 </div>
                 <div class="form-group" style="margin:0;">
                     <label>金額</label>
@@ -346,32 +380,54 @@
             event.target.classList.add('active');
         }
 
-        // 手帳功能
+        // 初始化當月日曆標題
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        document.getElementById('currentMonthDisplay').innerText = `🗓️ ${year} 年 ${month} 月行程總覽`;
+
+        // 預設日期為今天
+        document.getElementById('diaryDate').valueAsDate = new Date();
+
+        // 手帳功能（含搜尋與刪除）
         let diaries = JSON.parse(localStorage.getItem('diaries')) || [];
         function addDiary() {
             const date = document.getElementById('diaryDate').value;
             const content = document.getElementById('diaryContent').value;
             if(!date || !content) { alert('請填寫日期與內容'); return; }
 
-            diaries.unshift({ date, content });
+            diaries.unshift({ id: Date.now(), date, content });
             localStorage.setItem('diaries', JSON.stringify(diaries));
             renderDiaries();
             document.getElementById('diaryContent').value = '';
         }
 
+        function deleteDiary(id) {
+            diaries = diaries.filter(d => d.id !== id);
+            localStorage.setItem('diaries', JSON.stringify(diaries));
+            renderDiaries();
+        }
+
         function renderDiaries() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
             const list = document.getElementById('diaryList');
-            list.innerHTML = diaries.map(d => `
+            
+            const filtered = diaries.filter(d => 
+                d.content.toLowerCase().includes(keyword) || d.date.includes(keyword)
+            );
+
+            list.innerHTML = filtered.map(d => `
                 <li class="record-item">
                     <div class="record-info">
                         <span class="record-title">${d.content}</span>
                         <span class="record-date">📅 ${d.date}</span>
                     </div>
+                    <button class="del-btn" onclick="deleteDiary(${d.id})">刪除</button>
                 </li>
             `).join('');
         }
 
-        // 財務記帳與圖表功能
+        // 財務記帳與刪除功能
         let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
         let myChart = null;
 
@@ -382,12 +438,18 @@
 
             if(!title || isNaN(amount)) { alert('請填寫完整的項目與金額'); return; }
 
-            transactions.unshift({ title, amount, type });
+            transactions.unshift({ id: Date.now(), title, amount, type });
             localStorage.setItem('transactions', JSON.stringify(transactions));
             renderTransactions();
             
             document.getElementById('txTitle').value = '';
             document.getElementById('txAmount').value = '';
+        }
+
+        function deleteTransaction(id) {
+            transactions = transactions.filter(t => t.id !== id);
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            renderTransactions();
         }
 
         function renderTransactions() {
@@ -409,9 +471,12 @@
                             <span class="record-title">${t.title}</span>
                             <span class="record-date">${t.type === 'income' ? '收入' : '支出'}</span>
                         </div>
-                        <span class="record-amount ${t.type}">
-                            ${t.type === 'income' ? '+' : '-'} NT$ ${t.amount.toLocaleString()}
-                        </span>
+                        <div class="record-right">
+                            <span class="record-amount ${t.type}">
+                                ${t.type === 'income' ? '+' : '-'} NT$ ${t.amount.toLocaleString()}
+                            </span>
+                            <button class="del-btn" onclick="deleteTransaction(${t.id})">刪除</button>
+                        </div>
                     </li>
                 `;
             }).join('');
@@ -421,13 +486,8 @@
             const balance = income - expense;
             const balanceEl = document.getElementById('totalBalance');
             balanceEl.innerText = `NT$ ${balance.toLocaleString()}`;
-            balanceEl.style.color = balance >= baseColorCheck(balance) ? 'var(--accent-gold)' : 'var(--danger)';
 
             updateChart(expenseCategories);
-        }
-
-        function baseColorCheck(val) {
-            return 0; // 輔助檢查結餘正負色調
         }
 
         // 更新圓形比例圖
@@ -440,8 +500,7 @@
                 myChart.destroy();
             }
 
-            // 大地色系色票配置
-            const earthColors = ['#c5a059', '#e6c584', '#8c6d46', '#d99b6b', '#a67c52', '#594a3c'];
+            const earthColors = ['#9c7c47', '#b89355', '#c4a675', '#d99b6b', '#82786f', '#d4bfa8'];
 
             myChart = new Chart(ctx, {
                 type: 'doughnut',
@@ -449,9 +508,9 @@
                     labels: labels.length > 0 ? labels : ['尚無支出紀錄'],
                     datasets: [{
                         data: data.length > 0 ? data : [1],
-                        backgroundColor: labels.length > 0 ? earthColors.slice(0, labels.length) : ['#332e29'],
+                        backgroundColor: labels.length > 0 ? earthColors.slice(0, labels.length) : ['#e3d7c8'],
                         borderWidth: 1,
-                        borderColor: '#1c1a18'
+                        borderColor: '#fffbf5'
                     }]
                 },
                 options: {
@@ -461,7 +520,7 @@
                         legend: {
                             position: 'right',
                             labels: {
-                                color: '#d4d0c7',
+                                color: '#3e3832',
                                 font: { family: 'Zen Maru Gothic', size: 12 }
                             }
                         }
@@ -470,7 +529,7 @@
             });
         }
 
-        // 初始化
+        // 初始化載入
         renderDiaries();
         renderTransactions();
     </script>
