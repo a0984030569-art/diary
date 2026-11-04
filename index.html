@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Flow | 個人質感生活與財務手帳</title>
+    <title>Daily Flow | 個人生活與財務手帳</title>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* 溫潤大地色系調整 */
             --bg-color: #f4efe6;
             --card-bg: #fffbf5;
             --accent-gold: #9c7c47;
@@ -153,12 +152,10 @@
             background-color: var(--accent-hover);
         }
 
-        /* 搜尋框樣式 */
         .search-box {
             margin-bottom: 20px;
         }
 
-        /* 日曆與排版輔助 */
         .calendar-section {
             background-color: #fcf8f2;
             border: 1px solid var(--border-color);
@@ -170,7 +167,6 @@
             color: var(--accent-gold);
         }
 
-        /* 財務總結卡片 */
         .finance-summary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -238,9 +234,12 @@
             color: var(--text-main);
         }
 
-        .record-date {
+        .record-meta {
             font-size: 0.8rem;
             color: var(--text-muted);
+            display: flex;
+            gap: 10px;
+            margin-top: 3px;
         }
 
         .record-right {
@@ -281,7 +280,7 @@
     <div class="container">
         <header>
             <h1>🌿 Daily Flow</h1>
-            <p class="subtitle">個人質感生活行程管理與財務記帳看板 🐾</p>
+            <p class="subtitle">個人生活行程管理與財務記帳 🐾</p>
         </header>
 
         <!-- 頁籤導覽 -->
@@ -294,23 +293,34 @@
         <div id="diary" class="panel active">
             <h2>📅 每日行程與心情手帳</h2>
             
-            <!-- 日曆簡易檢視區 -->
             <div class="calendar-section" id="currentMonthDisplay">
                 🗓️ 載入行事曆中...
             </div>
 
-            <!-- 全域搜尋框 -->
             <div class="form-group search-box">
                 <label>🔍 快速檢索歷史手帳</label>
                 <input type="text" id="searchInput" placeholder="輸入關鍵字搜尋記事..." oninput="renderDiaries()">
             </div>
 
-            <div class="form-group">
-                <label>選擇日期</label>
-                <input type="date" id="diaryDate">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>選擇日期</label>
+                    <input type="date" id="diaryDate">
+                </div>
+                <div class="form-group">
+                    <label>今日心情狀態</label>
+                    <select id="diaryMood">
+                        <option value="😊 開心愉快">😊 開心愉快</option>
+                        <option value="🐾 慵懶放鬆">🐾 慵懶放鬆</option>
+                        <option value="✨ 充實期待">✨ 充實期待</option>
+                        <option value="☕ 平靜溫馨">☕ 平靜溫馨</option>
+                        <option value="🌧️ 疲憊需要休息">🌧️ 疲憊需要休息</option>
+                    </select>
+                </div>
             </div>
+
             <div class="form-group">
-                <label>今日心情與備忘</label>
+                <label>今日心情與備忘內容</label>
                 <textarea id="diaryContent" rows="3" placeholder="例如：今天完成專案進度，心情放鬆... 🐾"></textarea>
             </div>
             <button class="btn" onclick="addDiary()">儲存今日手帳</button>
@@ -322,7 +332,6 @@
         <div id="finance" class="panel">
             <h2>💰 個人收支與預算管理</h2>
             
-            <!-- 財務總結看板 -->
             <div class="finance-summary">
                 <div class="summary-card">
                     <h3>本月總收入</h3>
@@ -338,12 +347,10 @@
                 </div>
             </div>
 
-            <!-- 圓形比例圖 -->
             <div class="chart-container">
                 <canvas id="expenseChart"></canvas>
             </div>
 
-            <!-- 新增收支表單 -->
             <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; align-items: end;">
                 <div class="form-group" style="margin:0;">
                     <label>項目名稱</label>
@@ -380,23 +387,20 @@
             event.target.classList.add('active');
         }
 
-        // 初始化當月日曆標題
         const now = new Date();
         const year = now.getFullYear();
         const month = now.getMonth() + 1;
         document.getElementById('currentMonthDisplay').innerText = `🗓️ ${year} 年 ${month} 月行程總覽`;
-
-        // 預設日期為今天
         document.getElementById('diaryDate').valueAsDate = new Date();
 
-        // 手帳功能（含搜尋與刪除）
         let diaries = JSON.parse(localStorage.getItem('diaries')) || [];
         function addDiary() {
             const date = document.getElementById('diaryDate').value;
+            const mood = document.getElementById('diaryMood').value;
             const content = document.getElementById('diaryContent').value;
             if(!date || !content) { alert('請填寫日期與內容'); return; }
 
-            diaries.unshift({ id: Date.now(), date, content });
+            diaries.unshift({ id: Date.now(), date, mood, content });
             localStorage.setItem('diaries', JSON.stringify(diaries));
             renderDiaries();
             document.getElementById('diaryContent').value = '';
@@ -413,21 +417,23 @@
             const list = document.getElementById('diaryList');
             
             const filtered = diaries.filter(d => 
-                d.content.toLowerCase().includes(keyword) || d.date.includes(keyword)
+                d.content.toLowerCase().includes(keyword) || d.date.includes(keyword) || d.mood.toLowerCase().includes(keyword)
             );
 
             list.innerHTML = filtered.map(d => `
                 <li class="record-item">
                     <div class="record-info">
                         <span class="record-title">${d.content}</span>
-                        <span class="record-date">📅 ${d.date}</span>
+                        <div class="record-meta">
+                            <span>📅 ${d.date}</span>
+                            <span>${d.mood || '😊 開心愉快'}</span>
+                        </div>
                     </div>
                     <button class="del-btn" onclick="deleteDiary(${d.id})">刪除</button>
                 </li>
             `).join('');
         }
 
-        // 財務記帳與刪除功能
         let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
         let myChart = null;
 
@@ -484,13 +490,11 @@
             document.getElementById('totalIncome').innerText = `NT$ ${income.toLocaleString()}`;
             document.getElementById('totalExpense').innerText = `NT$ ${expense.toLocaleString()}`;
             const balance = income - expense;
-            const balanceEl = document.getElementById('totalBalance');
-            balanceEl.innerText = `NT$ ${balance.toLocaleString()}`;
+            document.getElementById('totalBalance').innerText = `NT$ ${balance.toLocaleString()}`;
 
             updateChart(expenseCategories);
         }
 
-        // 更新圓形比例圖
         function updateChart(categories) {
             const ctx = document.getElementById('expenseChart').getContext('2d');
             const labels = Object.keys(categories);
@@ -529,7 +533,6 @@
             });
         }
 
-        // 初始化載入
         renderDiaries();
         renderTransactions();
     </script>
